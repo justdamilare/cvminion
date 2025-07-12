@@ -2,7 +2,7 @@ import { getSupabaseClient } from './supabase';
 import { Profile, Education, Experience } from '../types/profile';
 
 const mapToDbFields = (data: Partial<Profile>) => {
-  const mapped: Record<string, any> = {};
+  const mapped: Record<string, unknown> = {};
   
   if (data.full_name !== undefined) mapped.full_name = data.full_name;
   if (data.email !== undefined) mapped.email = data.email;
@@ -63,6 +63,9 @@ const mapFromDbFields = (data: Profile): Profile => ({
   languages: Array.isArray(data.languages) ? data.languages : [],
   projects: Array.isArray(data.projects) ? data.projects : [],
   certifications: Array.isArray(data.certifications) ? data.certifications : [],
+  subscription_tier: data.subscription_tier || 'free',
+  total_credits: data.total_credits || 0,
+  available_credits: data.available_credits || 0,
   created_at: data.created_at,
   updated_at: data.updated_at
 });

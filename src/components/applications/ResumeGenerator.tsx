@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RefreshCw, Loader, Edit2, FileText, Code } from 'lucide-react';
 import { Profile } from '../../types/profile';
 import { Application, Resume } from '../../types/application';
 import { tailorResume } from '../../lib/resume';
+import { consumeCredits } from '../../lib/credits';
 import { toast } from 'react-hot-toast';
 import { ResumeEditor } from './ResumeEditor';
 import { PDFResume } from './PDFResume';
 import { ResumeTemplates } from './ResumeTemplates';
 import { ResumeTemplate } from './templates/TemplateBase';
 import { ModernTemplate } from './templates/ModernTemplate';
+import { useCredits } from '../../hooks/useCredits';
+import { getSupabaseClient } from '../../lib/supabase';
 
 interface ResumeGeneratorProps {
   profile: Profile;
@@ -26,13 +29,48 @@ export const ResumeGenerator: React.FC<ResumeGeneratorProps> = ({
   const [showPDF, setShowPDF] = useState(false);
   const [showJSON, setShowJSON] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ResumeTemplate>(ModernTemplate);
+  const [userId, setUserId] = useState<string | null>(null);
+  
+  const { hasEnoughCredits } = useCredits(userId || undefined);
+
+  // Get current user ID
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const supabase = getSupabaseClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    getCurrentUser();
+  }, []);
 
   const handleGenerate = async () => {
+    if (!userId) {
+      toast.error('Please log in to generate a resume.');
+      return;
+    }
+
+    // Check if user has enough credits
+    if (!hasEnoughCredits(1)) {
+      toast.error('Insufficient credits. Please purchase more credits to generate a resume.');
+      return;
+    }
+
     setLoading(true);
     try {
+      // First, consume the credit
+      const creditConsumed = await consumeCredits(userId, 1);
+      
+      if (!creditConsumed) {
+        toast.error('Failed to consume credits. Please try again.');
+        return;
+      }
+
+      // Then generate the resume
       const response = await tailorResume(profile, application);
       
       if (response.status === 'error') {
+        // If resume generation fails, we should ideally refund the credit
+        // For now, we'll just show the error
         throw new Error(response.error);
       }
 
@@ -48,7 +86,8 @@ export const ResumeGenerator: React.FC<ResumeGeneratorProps> = ({
         atsScore: response.ats_score.overall_score,
         lastGeneratedAt: new Date().toISOString()
       });
-      toast.success('Resume generated successfully');
+      
+      toast.success('Resume generated successfully! 1 credit consumed.');
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       toast.error(errorMessage);

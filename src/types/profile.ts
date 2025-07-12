@@ -63,6 +63,9 @@ export interface Profile {
   languages: Language[];
   projects: Project[];
   certifications: Certification[];
+  subscription_tier?: 'free' | 'pro' | 'enterprise';
+  total_credits?: number;
+  available_credits?: number;
   created_at: string;
   updated_at: string;
 }
