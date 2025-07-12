@@ -17,7 +17,7 @@ const plans = [
     popular: false
   },
   {
-    name: "Pro",
+    name: "Plus",
     price: "$12",
     period: "/month",
     features: [
@@ -33,7 +33,7 @@ const plans = [
     popular: true
   },
   {
-    name: "Enterprise",
+    name: "Pro",
     price: "$39",
     period: "/month",
     features: [

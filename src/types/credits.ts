@@ -1,4 +1,4 @@
-export type SubscriptionTier = 'free' | 'pro' | 'enterprise';
+export type SubscriptionTier = 'free' | 'plus' | 'pro';
 export type CreditType = 'monthly' | 'purchased' | 'bonus';
 export type TransactionType = 'earned' | 'consumed' | 'purchased' | 'expired';
 
@@ -77,7 +77,7 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
       'Basic support'
     ]
   },
-  pro: {
+  plus: {
     monthly_credits: 30,
     max_rollover: 60,
     price_per_month: 12,
@@ -90,7 +90,7 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
       'Export formats'
     ]
   },
-  enterprise: {
+  pro: {
     monthly_credits: 100,
     max_rollover: 200,
     price_per_month: 39,
@@ -115,10 +115,10 @@ export const getTierDisplayName = (tier: SubscriptionTier): string => {
   switch (tier) {
     case 'free':
       return 'Free';
+    case 'plus':
+      return 'Plus';
     case 'pro':
       return 'Pro';
-    case 'enterprise':
-      return 'Enterprise';
     default:
       return 'Free';
   }
@@ -128,9 +128,9 @@ export const getTierColor = (tier: SubscriptionTier): string => {
   switch (tier) {
     case 'free':
       return 'text-gray-400';
-    case 'pro':
+    case 'plus':
       return 'text-primary';
-    case 'enterprise':
+    case 'pro':
       return 'text-yellow-400';
     default:
       return 'text-gray-400';

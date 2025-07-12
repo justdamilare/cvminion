@@ -151,8 +151,8 @@ SELECT available_credits FROM profiles WHERE user_id = 'your-user-id';
 
 **Example Scenarios**:
 - Free tier: Max 6 credits total (3 monthly + 3 rollover)
-- Pro tier: Max 60 credits total (30 monthly + 30 rollover)
-- Enterprise: Max 200 credits total (100 monthly + 100 rollover)
+- Plus tier: Max 60 credits total (30 monthly + 30 rollover)
+- Pro tier: Max 200 credits total (100 monthly + 100 rollover)
 
 ### 9. Edge Function Operations
 
@@ -170,8 +170,8 @@ SELECT available_credits FROM profiles WHERE user_id = 'your-user-id';
 
 **Monthly Allocations**:
 - Free: 3 credits/month
-- Pro: 30 credits/month  
-- Enterprise: 100 credits/month
+- Plus: 30 credits/month  
+- Pro: 100 credits/month
 
 ### Error Handling Tests
 

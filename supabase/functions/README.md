@@ -87,7 +87,7 @@ Handles subscription tier changes and upgrades.
 **Request Body**:
 ```json
 {
-  "new_tier": "pro",
+  "new_tier": "plus",
   "payment_method_id": "demo"  // Optional
 }
 ```
@@ -97,7 +97,7 @@ Handles subscription tier changes and upgrades.
 {
   "success": true,
   "previous_tier": "free",
-  "new_tier": "pro",
+  "new_tier": "plus",
   "monthly_credits": 30,
   "monthly_price": 9.99,
   "current_credits": 30,
@@ -146,7 +146,7 @@ Handles subscription tier changes and upgrades.
    curl -X POST http://localhost:54321/functions/v1/upgrade-subscription \
      -H "Authorization: Bearer YOUR_ANON_KEY" \
      -H "Content-Type: application/json" \
-     -d '{"new_tier": "pro"}'
+     -d '{"new_tier": "plus"}'
    ```
 
 ### Production Deployment

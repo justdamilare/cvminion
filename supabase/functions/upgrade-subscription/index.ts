@@ -7,20 +7,20 @@ const corsHeaders = {
 };
 
 interface UpgradeRequest {
-  new_tier: 'free' | 'pro' | 'enterprise';
+  new_tier: 'free' | 'plus' | 'pro';
   payment_method_id?: string;
 }
 
 const tierPricing = {
   free: 0,
-  pro: 9.99,
-  enterprise: 29.99
+  plus: 9.99,
+  pro: 29.99
 };
 
 const tierCredits = {
   free: 3,
-  pro: 30,
-  enterprise: 100
+  plus: 30,
+  pro: 100
 };
 
 Deno.serve(async (req: Request) => {
@@ -50,7 +50,7 @@ Deno.serve(async (req: Request) => {
     // Parse request body
     const { new_tier, payment_method_id = 'demo' }: UpgradeRequest = await req.json();
 
-    if (!new_tier || !['free', 'pro', 'enterprise'].includes(new_tier)) {
+    if (!new_tier || !['free', 'plus', 'pro'].includes(new_tier)) {
       throw new Error('Invalid subscription tier');
     }
 
