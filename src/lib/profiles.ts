@@ -148,6 +148,35 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
   }
 };
 
+// Calculate profile completion percentage
+export const calculateProfileCompletion = (profile: Profile): number => {
+  let score = 0;
+  const totalFields = 10;
+
+  // Basic info (4 points)
+  if (profile.full_name?.trim()) score += 1;
+  if (profile.email?.trim()) score += 1;
+  if (profile.phone_number?.trim()) score += 1;
+  if (profile.address?.trim()) score += 1;
+
+  // Professional summary (1 point)
+  if (profile.summary?.trim() && profile.summary.length > 50) score += 1;
+
+  // Professional title (1 point)
+  if (profile.title?.trim()) score += 1;
+
+  // Experience (2 points)
+  if (profile.experience?.length >= 1) score += 2;
+
+  // Education (1 point)
+  if (profile.education?.length >= 1) score += 1;
+
+  // Skills (1 point)
+  if (profile.skills?.length >= 3) score += 1;
+
+  return Math.round((score / totalFields) * 100);
+};
+
 export const updateProfile = async (userId: string, data: Partial<Profile>) => {
   const supabase = getSupabaseClient();
   
@@ -162,5 +191,17 @@ export const updateProfile = async (userId: string, data: Partial<Profile>) => {
     .maybeSingle();
 
   if (error) throw error;
-  return mapFromDbFields(profile as unknown as Profile);
+  
+  const updatedProfile = mapFromDbFields(profile as unknown as Profile);
+  
+  // Calculate and update profile completion percentage
+  const completionPercentage = calculateProfileCompletion(updatedProfile);
+  
+  // Update the completion percentage in the database
+  await supabase
+    .from('profiles')
+    .update({ profile_completion_percentage: completionPercentage })
+    .eq('user_id', userId);
+
+  return updatedProfile;
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { toast } from 'react-hot-toast';
-import { Grid3X3, List } from 'lucide-react';
+import { Grid3X3, List, User, Zap, TrendingUp } from 'lucide-react';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
 import { ApplicationCard } from '../components/dashboard/ApplicationCard';
 import { ApplicationModal, ApplicationFormData } from '../components/applications/ApplicationModal';
@@ -9,6 +9,8 @@ import { FadeIn } from '../components/ui/FadeIn';
 import { getApplications, createApplication, updateApplication } from '../lib/applications';
 import { Application } from '../types/application';
 import { getSupabaseClient } from '../lib/supabase';
+import { useProfile } from '../hooks/useProfile';
+import { useNavigate } from 'react-router-dom';
 
 type ViewMode = 'cards' | 'list';
 
@@ -18,6 +20,9 @@ export const Dashboard = () => {
   const [selectedApplication, setSelectedApplication] = React.useState<Application | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [viewMode, setViewMode] = React.useState<ViewMode>('list');
+  
+  const { profile, completionPercentage } = useProfile();
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     loadApplications();
@@ -78,6 +83,51 @@ export const Dashboard = () => {
     <div className="min-h-screen bg-dark p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         <DashboardHeader onNewApplication={() => setIsModalOpen(true)} />
+        
+        {/* Profile Completion Widget */}
+        {completionPercentage < 100 && (
+          <div className="bg-gradient-to-r from-primary/10 to-primary-dark/10 border border-primary/20 rounded-xl p-4 md:p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="bg-primary/20 p-3 rounded-full">
+                  <User className="w-6 h-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-white">Profile Completion</h3>
+                  <p className="text-gray-300 text-sm">
+                    Your profile is {completionPercentage}% complete. 
+                    {completionPercentage < 60 ? ' Complete it to improve your resume quality!' : ' Almost there!'}
+                  </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="w-24 sm:w-32 bg-gray-700 rounded-full h-2">
+                      <div 
+                        className="bg-primary h-2 rounded-full transition-all duration-500"
+                        style={{ width: `${completionPercentage}%` }}
+                      />
+                    </div>
+                    <span className="text-sm text-gray-400">{completionPercentage}%</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  View Profile
+                </button>
+                <button
+                  onClick={() => navigate('/profile/wizard')}
+                  className="px-4 py-2 bg-primary text-dark font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
+                >
+                  <Zap className="w-4 h-4" />
+                  Quick Setup
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* View Toggle */}
         <div className="flex justify-end">

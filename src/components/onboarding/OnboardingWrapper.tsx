@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useCredits } from '../../hooks/useCredits';
+import { useProfile } from '../../hooks/useProfile';
 import { WelcomeModal } from './WelcomeModal';
 import { SubscriptionSetupModal } from './SubscriptionSetupModal';
 import { ProfileSetupGuide } from './ProfileSetupGuide';
@@ -16,6 +17,7 @@ type OnboardingStep = 'welcome' | 'subscription' | 'profile' | 'completed' | nul
 export const OnboardingWrapper: React.FC<OnboardingWrapperProps> = ({ children }) => {
   const { user } = useAuth();
   const { subscriptionTier } = useCredits(user?.id);
+  const { profile, refreshProfile } = useProfile();
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -55,14 +57,14 @@ export const OnboardingWrapper: React.FC<OnboardingWrapperProps> = ({ children }
         setCurrentStep('welcome');
       } else if (setupSubscription) {
         setCurrentStep('subscription');
-      } else if (profile?.onboarding_completed === false) {
+      } else if (profile?.onboarding_completed === false || !isProfileComplete()) {
         // Check what step they're on
         const step = profile?.onboarding_step;
         if (step === 'welcome') {
           setCurrentStep('welcome');
         } else if (step === 'payment' || step === 'subscription') {
           setCurrentStep('subscription');
-        } else if (step === 'profile') {
+        } else if (step === 'profile' || !isProfileComplete()) {
           setCurrentStep('profile');
         } else {
           setCurrentStep('welcome'); // Default to welcome for new users
@@ -150,10 +152,24 @@ export const OnboardingWrapper: React.FC<OnboardingWrapperProps> = ({ children }
 
   const handleProfileComplete = () => {
     completeOnboarding();
+    refreshProfile(); // Refresh profile data after completion
   };
 
   const handleProfileSkip = () => {
     completeOnboarding();
+  };
+
+  // Check if profile is sufficiently complete to skip onboarding
+  const isProfileComplete = () => {
+    if (!profile) return false;
+    
+    // Check basic completion criteria
+    const hasBasicInfo = profile.full_name && profile.email && profile.phone_number;
+    const hasProfessionalInfo = profile.title && profile.summary && profile.summary.length > 50;
+    const hasExperience = profile.experience && profile.experience.length > 0;
+    const hasSkills = profile.skills && profile.skills.length >= 3;
+    
+    return hasBasicInfo && hasProfessionalInfo && (hasExperience || hasSkills);
   };
 
   if (isLoading) {

@@ -44,17 +44,19 @@ export const SignUpWizard = () => {
         localStorage.setItem('selectedPlan', selectedPlan);
       }
 
-      // Set initial subscription tier in user profile
+      // Set initial subscription tier in user profile and mark as new user needing onboarding
       const supabase = getSupabaseClient();
       await supabase
         .from('profiles')
         .update({ 
           subscription_tier: selectedPlan,
-          onboarding_step: selectedPlan === 'free' ? 'welcome' : 'payment'
+          onboarding_completed: false,
+          onboarding_step: selectedPlan === 'free' ? 'welcome' : 'payment',
+          profile_completion_percentage: 0
         })
         .eq('user_id', user.id);
 
-      // Navigate to dashboard or payment setup
+      // Navigate to dashboard which will trigger onboarding flow
       if (selectedPlan === 'free') {
         navigate('/dashboard?welcome=true');
       } else {

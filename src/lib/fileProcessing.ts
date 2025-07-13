@@ -4,6 +4,8 @@
  */
 
 import JSZip from 'jszip';
+import { parsePDF, PDFParsingResult } from './pdfParser';
+import { extractResumeDataWithAI, ExtractedResumeData } from './aiResumeExtractor';
 
 export interface FileProcessingOptions {
   maxSizeBytes?: number;
@@ -20,7 +22,16 @@ export interface FileProcessingResult {
     fileSize: number;
     fileType: string;
     processedAt: Date;
+    extractionMethod?: string;
+    confidence?: number;
   };
+}
+
+export interface PDFProcessingOptions extends FileProcessingOptions {
+  pdfParsingMethod?: 'pdfjs' | 'ocr' | 'auto';
+  enableAIExtraction?: boolean;
+  openAIApiKey?: string;
+  preserveLayout?: boolean;
 }
 
 export const DEFAULT_OPTIONS: FileProcessingOptions = {
@@ -212,9 +223,8 @@ export const processLinkedInFile = async (
         break;
         
       case 'application/pdf':
-        // For PDF files, we'll need to extract text
-        // This would require a PDF parsing library
-        throw new Error('PDF processing not yet implemented. Please use JSON or ZIP exports from LinkedIn.');
+        processedData = await processPDFFile(content as ArrayBuffer, file.name);
+        break;
         
       default:
         throw new Error(`Unsupported file type: ${file.type}`);
@@ -306,4 +316,178 @@ export const processFileWithProgress = async (
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     };
   }
+};
+
+/**
+ * Process PDF files for resume import
+ */
+export const processPDFFile = async (
+  arrayBuffer: ArrayBuffer, 
+  fileName: string,
+  options: PDFProcessingOptions = {}
+): Promise<any> => {
+  try {
+    // Extract text from PDF
+    const pdfResult: PDFParsingResult = await parsePDF(arrayBuffer, {
+      method: options.pdfParsingMethod || 'auto',
+      preserveLayout: options.preserveLayout || false,
+      enableOCRFallback: true,
+    });
+
+    if (!pdfResult.success) {
+      throw new Error(`PDF text extraction failed: ${pdfResult.error}`);
+    }
+
+    // If AI extraction is enabled and API key is provided
+    if (options.enableAIExtraction && options.openAIApiKey) {
+      try {
+        const aiResult: ExtractedResumeData = await extractResumeDataWithAI(pdfResult.text, {
+          apiKey: options.openAIApiKey,
+          enableFallbackParsing: true,
+        });
+
+        return {
+          type: 'structured_resume',
+          extractedText: pdfResult.text,
+          structuredData: aiResult,
+          pdfMetadata: pdfResult.metadata,
+          extractionMethod: 'ai_structured',
+          confidence: aiResult.confidence.overall,
+        };
+      } catch (aiError) {
+        console.warn('AI extraction failed, returning text only:', aiError);
+        // Fall back to text-only extraction
+      }
+    }
+
+    // Return text-only extraction
+    return {
+      type: 'text_resume',
+      extractedText: pdfResult.text,
+      pdfMetadata: pdfResult.metadata,
+      extractionMethod: pdfResult.metadata?.method || 'unknown',
+      confidence: pdfResult.metadata?.confidence || 70,
+    };
+
+  } catch (error) {
+    throw new Error(`PDF processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+/**
+ * Enhanced PDF processing with progress updates
+ */
+export const processPDFWithProgress = async (
+  file: File,
+  onProgress: ProgressCallback,
+  options: PDFProcessingOptions = {}
+): Promise<FileProcessingResult> => {
+  try {
+    onProgress(0, 'Validating PDF file...');
+    
+    const validation = validateFile(file, options);
+    if (!validation.valid) {
+      return { success: false, error: validation.error };
+    }
+    
+    onProgress(10, 'Reading PDF content...');
+    const arrayBuffer = await file.arrayBuffer();
+    
+    onProgress(20, 'Extracting text from PDF...');
+    const pdfResult: PDFParsingResult = await parsePDF(arrayBuffer, {
+      method: options.pdfParsingMethod || 'auto',
+      preserveLayout: options.preserveLayout || false,
+      enableOCRFallback: true,
+    });
+
+    if (!pdfResult.success) {
+      return {
+        success: false,
+        error: `PDF text extraction failed: ${pdfResult.error}`
+      };
+    }
+
+    onProgress(60, 'Text extracted successfully...');
+    let processedData: any = {
+      type: 'text_resume',
+      extractedText: pdfResult.text,
+      pdfMetadata: pdfResult.metadata,
+      extractionMethod: pdfResult.metadata?.method || 'unknown',
+    };
+
+    // AI extraction if enabled
+    if (options.enableAIExtraction && options.openAIApiKey) {
+      onProgress(70, 'Analyzing resume with AI...');
+      
+      try {
+        const aiResult: ExtractedResumeData = await extractResumeDataWithAI(pdfResult.text, {
+          apiKey: options.openAIApiKey,
+          enableFallbackParsing: true,
+        });
+
+        processedData = {
+          type: 'structured_resume',
+          extractedText: pdfResult.text,
+          structuredData: aiResult,
+          pdfMetadata: pdfResult.metadata,
+          extractionMethod: 'ai_structured',
+          confidence: aiResult.confidence.overall,
+        };
+
+        onProgress(90, 'AI analysis completed...');
+      } catch (aiError) {
+        console.warn('AI extraction failed, using text extraction only:', aiError);
+        onProgress(80, 'AI analysis failed, using text extraction...');
+      }
+    }
+    
+    onProgress(100, 'PDF processing completed!');
+    
+    return {
+      success: true,
+      data: processedData,
+      metadata: {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        processedAt: new Date(),
+        extractionMethod: processedData.extractionMethod,
+        confidence: processedData.confidence,
+      }
+    };
+
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown PDF processing error'
+    };
+  }
+};
+
+/**
+ * Validate PDF file specifically
+ */
+export const validatePDFFile = (file: File): { valid: boolean; error?: string } => {
+  if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+    return {
+      valid: false,
+      error: 'File must be a PDF (.pdf)'
+    };
+  }
+
+  if (file.size > 50 * 1024 * 1024) { // 50MB limit
+    return {
+      valid: false,
+      error: `PDF file size ${(file.size / 1024 / 1024).toFixed(1)}MB exceeds maximum allowed size of 50MB`
+    };
+  }
+
+  if (file.size < 1024) { // 1KB minimum
+    return {
+      valid: false,
+      error: 'PDF file appears to be too small or corrupted'
+    };
+  }
+
+  return { valid: true };
 };

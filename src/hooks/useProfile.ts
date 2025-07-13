@@ -8,6 +8,7 @@ export const useProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [completionPercentage, setCompletionPercentage] = useState(0);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -51,6 +52,45 @@ export const useProfile = () => {
     loadProfile();
   }, [loadProfile]);
 
+  // Get completion percentage from database and fallback to calculation
+  const getCompletionPercentage = useCallback(async () => {
+    if (!profile) return 0;
+    
+    try {
+      const supabase = getSupabaseClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+
+      const { data } = await supabase
+        .from('profiles')
+        .select('profile_completion_percentage')
+        .eq('user_id', user.id)
+        .single();
+
+      if (data?.profile_completion_percentage !== null && data?.profile_completion_percentage !== undefined) {
+        return data.profile_completion_percentage;
+      }
+
+      // Fallback to calculation if not in database
+      const { calculateProfileCompletion } = await import('../lib/profiles');
+      return calculateProfileCompletion(profile);
+    } catch (error) {
+      console.error('Error getting completion percentage:', error);
+      // Fallback to calculation
+      const { calculateProfileCompletion } = await import('../lib/profiles');
+      return calculateProfileCompletion(profile);
+    }
+  }, [profile]);
+
+  // Update completion percentage when profile changes
+  useEffect(() => {
+    if (profile) {
+      getCompletionPercentage().then(setCompletionPercentage);
+    } else {
+      setCompletionPercentage(0);
+    }
+  }, [profile, getCompletionPercentage]);
+
   useEffect(() => {
     loadProfile();
   }, [loadProfile]);
@@ -60,7 +100,8 @@ export const useProfile = () => {
     loading, 
     error, 
     updating, 
+    completionPercentage,
     updateProfile: updateProfileData, 
-    refreshProfile 
+    refreshProfile
   };
 };

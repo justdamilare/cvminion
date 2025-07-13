@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { Landing } from './pages/Landing';
 import { SignIn } from './pages/SignIn';
@@ -10,8 +10,33 @@ import { SubscriptionPage } from './pages/Subscription';
 import { Navbar } from './components/Navbar';
 import { ConnectSupabase } from './components/ui/ConnectSupabase';
 import { OnboardingWrapper } from './components/onboarding/OnboardingWrapper';
+import { GuidedProfileWizard } from './components/profile/GuidedProfileWizard';
 import { useAuth } from './hooks/useAuth';
+import { useProfile } from './hooks/useProfile';
 import { CheckoutReturn } from './components/payments/CheckoutReturn';
+
+// Profile Wizard Page Component
+const ProfileWizardPage = () => {
+  const { profile, updateProfile } = useProfile();
+  const navigate = useNavigate();
+
+  const handleComplete = () => {
+    navigate('/profile', { replace: true });
+  };
+
+  return (
+    <div className="min-h-screen bg-dark p-6">
+      <div className="max-w-4xl mx-auto">
+        <GuidedProfileWizard
+          profile={profile}
+          onUpdate={updateProfile}
+          onComplete={handleComplete}
+          isNewUser={false}
+        />
+      </div>
+    </div>
+  );
+};
 
 function App() {
   const { isAuthenticated, isLoading, error } = useAuth();
@@ -47,6 +72,10 @@ function App() {
             <Route 
               path="/profile" 
               element={isAuthenticated ? <ProfilePage /> : <Navigate to="/signin" />} 
+            />
+            <Route 
+              path="/profile/wizard" 
+              element={isAuthenticated ? <ProfileWizardPage /> : <Navigate to="/signin" />} 
             />
             <Route 
               path="/subscription" 

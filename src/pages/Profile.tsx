@@ -16,7 +16,14 @@ import { CertificationsSection } from '../components/profile/CertificationsSecti
 import { Settings, Zap, Target, BarChart3, User } from 'lucide-react';
 
 export const ProfilePage = () => {
-  const { profile, loading, updating, updateProfile: updateProfileData, refreshProfile } = useProfile();
+  const { 
+    profile, 
+    loading, 
+    updating, 
+    completionPercentage,
+    updateProfile: updateProfileData, 
+    refreshProfile 
+  } = useProfile();
   const [activeView, setActiveView] = useState<'standard' | 'wizard' | 'dashboard'>('standard');
   const [showCompletionIndicators, setShowCompletionIndicators] = useState(true);
 
@@ -102,11 +109,55 @@ export const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-dark p-6">
       <div className="max-w-7xl mx-auto space-y-8">
+        {/* New User Welcome Banner */}
+        {completionPercentage < 30 && (
+          <div className="bg-gradient-to-r from-primary/20 to-primary-dark/20 border border-primary/30 rounded-xl p-4 md:p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex-1">
+                <h2 className="text-xl md:text-2xl font-bold text-white mb-2">Welcome to CVMinion! 🚀</h2>
+                <p className="text-gray-300 mb-4">
+                  Let's get your profile set up to start creating amazing resumes and landing interviews.
+                </p>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-gray-400">
+                  <span>Current completion: {completionPercentage}%</span>
+                  <div className="w-full sm:w-32 bg-gray-700 rounded-full h-2">
+                    <div 
+                      className="bg-primary h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${completionPercentage}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveView('wizard')}
+                className="bg-primary text-dark font-bold px-4 md:px-6 py-2 md:py-3 rounded-lg hover:bg-primary-dark transition-all flex items-center justify-center gap-2 w-full md:w-auto"
+              >
+                <Zap className="w-4 md:w-5 h-4 md:h-5" />
+                <span className="text-sm md:text-base">Quick Setup (5 min)</span>
+              </button>
+            </div>
+          </div>
+        )}
         {/* Header with View Toggle */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">Profile Management</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">Profile Management</h1>
+              <div className="flex items-center gap-2 bg-gray-800 px-3 py-1 rounded-full w-fit">
+                <div className={`w-3 h-3 rounded-full ${
+                  completionPercentage >= 80 ? 'bg-green-500' :
+                  completionPercentage >= 60 ? 'bg-yellow-500' :
+                  completionPercentage >= 40 ? 'bg-orange-500' : 'bg-red-500'
+                }`} />
+                <span className="text-sm font-medium text-white">{completionPercentage}% Complete</span>
+              </div>
+            </div>
             <p className="text-gray-400">Build and maintain your professional profile</p>
+            {completionPercentage < 100 && (
+              <div className="mt-2 text-sm text-gray-300">
+                💡 Complete your profile to improve job application success
+              </div>
+            )}
           </div>
           
           {/* View Toggle */}
