@@ -1,2 +1,2 @@
-[functions.cvminion]
+[functions.get-credit-status]
 verify_jwt = true 

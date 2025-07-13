@@ -1,2 +1,2 @@
-[functions.cvminion]
+[functions.create-payment-intent]
 verify_jwt = true 

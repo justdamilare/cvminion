@@ -7,22 +7,30 @@ import { GradientBorder } from '../ui/GradientBorder';
 interface AuthFormProps {
   mode: 'signin' | 'signup';
   onSubmit: (email: string, password: string) => Promise<void>;
+  isLoading?: boolean;
+  submitText?: string;
 }
 
-export const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit }) => {
+export const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, isLoading: externalLoading, submitText }) => {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
+  const [internalLoading, setInternalLoading] = React.useState(false);
+  
+  const loading = externalLoading ?? internalLoading;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    if (externalLoading === undefined) {
+      setInternalLoading(true);
+    }
     try {
       await onSubmit(email, password);
     } catch (error: any) {
       toast.error(error.message);
     } finally {
-      setLoading(false);
+      if (externalLoading === undefined) {
+        setInternalLoading(false);
+      }
     }
   };
 
@@ -76,7 +84,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit }) => {
               <span>Loading...</span>
             </>
           ) : (
-            <span>{mode === 'signin' ? 'Sign In' : 'Sign Up'}</span>
+            <span>{submitText || (mode === 'signin' ? 'Sign In' : 'Sign Up')}</span>
           )}
         </button>
       </GradientBorder>

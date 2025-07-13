@@ -170,7 +170,7 @@ export const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
                 onClose={() => setShowStripeModal(false)}
                 userId={userId}
                 mode="credits"
-                selectedCredits={packages.find(p => p.id === selectedPackage)?.credits}
+                selectedCreditPackage={packages.find(p => p.id === selectedPackage)}
                 onSuccess={() => {
                   setShowStripeModal(false);
                   onPurchaseSuccess?.();

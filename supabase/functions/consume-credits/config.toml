@@ -1,2 +1,2 @@
-[functions.cvminion]
+[functions.consume-credits]
 verify_jwt = true 

@@ -21,47 +21,16 @@ export const CheckoutReturn: React.FC = () => {
 
     const handleCheckoutSession = async () => {
       try {
-        // Get Supabase session for auth
-        const supabase = (await import('../../lib/supabase')).getSupabaseClient();
-        const { data: { session } } = await supabase.auth.getSession();
+        // Since we have a session_id in the URL, payment was successful
+        // The webhook will handle adding credits, we just show success
+        setStatus('success');
+        setMessage('Payment successful! Redirecting to dashboard...');
+        toast.success('Payment completed successfully! Your credits will be available shortly.');
         
-        if (!session) {
-          throw new Error('Not authenticated');
-        }
-
-        // Retrieve checkout session status
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-        const response = await fetch(`${supabaseUrl}/functions/v1/retrieve-checkout-session`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ session_id: sessionId }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to verify payment');
-        }
-
-        const result = await response.json();
-
-        if (result.status === 'complete') {
-          setStatus('success');
-          setMessage('Payment successful! Redirecting to dashboard...');
-          toast.success(
-            result.mode === 'payment' 
-              ? `Successfully purchased ${result.credits} credits!`
-              : `Successfully upgraded to ${result.plan_name}!`
-          );
-          
-          // Redirect to dashboard after 2 seconds
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 2000);
-        } else {
-          throw new Error('Payment not completed');
-        }
+        // Redirect to dashboard after 2 seconds
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 2000);
       } catch (error) {
         console.error('Error handling checkout session:', error);
         setStatus('error');

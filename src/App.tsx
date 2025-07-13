@@ -6,8 +6,10 @@ import { SignIn } from './pages/SignIn';
 import { SignUp } from './pages/SignUp';
 import { Dashboard } from './pages/Dashboard';
 import { ProfilePage } from './pages/Profile';
+import { SubscriptionPage } from './pages/Subscription';
 import { Navbar } from './components/Navbar';
 import { ConnectSupabase } from './components/ui/ConnectSupabase';
+import { OnboardingWrapper } from './components/onboarding/OnboardingWrapper';
 import { useAuth } from './hooks/useAuth';
 import { CheckoutReturn } from './components/payments/CheckoutReturn';
 
@@ -27,26 +29,32 @@ function App() {
     <Router>
       <div className="min-h-screen bg-dark">
         <Navbar isAuthenticated={isAuthenticated} />
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route 
-            path="/signin" 
-            element={isAuthenticated ? <Navigate to="/dashboard" /> : <SignIn />} 
-          />
-          <Route 
-            path="/signup" 
-            element={isAuthenticated ? <Navigate to="/dashboard" /> : <SignUp />} 
-          />
-          <Route 
-            path="/dashboard" 
-            element={isAuthenticated ? <Dashboard /> : <Navigate to="/signin" />} 
-          />
-          <Route 
-            path="/profile" 
-            element={isAuthenticated ? <ProfilePage /> : <Navigate to="/signin" />} 
-          />
-          <Route path="/checkout/return" element={<CheckoutReturn />} />
-        </Routes>
+        <OnboardingWrapper>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route 
+              path="/signin" 
+              element={isAuthenticated ? <Navigate to="/dashboard" /> : <SignIn />} 
+            />
+            <Route 
+              path="/signup" 
+              element={isAuthenticated ? <Navigate to="/dashboard" /> : <SignUp />} 
+            />
+            <Route 
+              path="/dashboard" 
+              element={isAuthenticated ? <Dashboard /> : <Navigate to="/signin" />} 
+            />
+            <Route 
+              path="/profile" 
+              element={isAuthenticated ? <ProfilePage /> : <Navigate to="/signin" />} 
+            />
+            <Route 
+              path="/subscription" 
+              element={isAuthenticated ? <SubscriptionPage /> : <Navigate to="/signin" />} 
+            />
+            <Route path="/checkout/return" element={<CheckoutReturn />} />
+          </Routes>
+        </OnboardingWrapper>
         <Toaster position="top-right" />
       </div>
     </Router>

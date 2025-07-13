@@ -11,6 +11,13 @@ interface StripePaymentModalProps {
   mode: 'credits' | 'subscription';
   selectedPlan?: keyof typeof subscriptionPlans;
   selectedCredits?: number;
+  selectedCreditPackage?: {
+    id: string;
+    name: string;
+    credits: number;
+    price_cents: number;
+    description?: string;
+  };
 }
 
 export const StripePaymentModal: React.FC<StripePaymentModalProps> = ({
@@ -20,26 +27,38 @@ export const StripePaymentModal: React.FC<StripePaymentModalProps> = ({
   onSuccess,
   mode,
   selectedPlan,
-  selectedCredits
+  selectedCredits,
+  selectedCreditPackage
 }) => {
   const [selectedOption, setSelectedOption] = useState<string>('');
 
   useEffect(() => {
     if (mode === 'subscription' && selectedPlan) {
       setSelectedOption(selectedPlan);
+    } else if (mode === 'credits' && selectedCreditPackage) {
+      setSelectedOption(selectedCreditPackage.id);
     } else if (mode === 'credits' && selectedCredits) {
       const creditPackage = creditPackages.find(pkg => pkg.credits === selectedCredits);
       if (creditPackage) {
         setSelectedOption(creditPackage.id);
       }
     }
-  }, [mode, selectedPlan, selectedCredits]);
+  }, [mode, selectedPlan, selectedCredits, selectedCreditPackage]);
 
   if (!isOpen) return null;
 
   const getSelectedData = () => {
     if (mode === 'subscription') {
       return subscriptionPlans[selectedOption as keyof typeof subscriptionPlans];
+    } else if (selectedCreditPackage) {
+      // Convert database format to expected format
+      return {
+        id: selectedCreditPackage.id,
+        name: selectedCreditPackage.name,
+        credits: selectedCreditPackage.credits,
+        price: selectedCreditPackage.price_cents, // Convert price_cents to price
+        description: selectedCreditPackage.description,
+      };
     } else {
       return creditPackages.find(pkg => pkg.id === selectedOption);
     }

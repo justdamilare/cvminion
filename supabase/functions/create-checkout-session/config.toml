@@ -1,2 +1,2 @@
-[functions.cvminion]
+[functions.create-checkout-session]
 verify_jwt = true 

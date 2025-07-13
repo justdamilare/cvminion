@@ -82,22 +82,13 @@ Deno.serve(async (req: Request) => {
     };
 
     if (metadata?.mode === 'credits') {
-      // Handle credit purchase
+      // Handle credit purchase verification (credits are added by webhook)
       const credits = parseInt(metadata.credits || '0');
       const packageName = metadata.package_name;
 
-      // Add credits to user account
-      const { error: creditError } = await supabaseClient.rpc('add_user_credits', {
-        user_uuid: userId,
-        credits_to_add: credits,
-        description: `Purchased ${packageName}`,
-        transaction_type: 'purchase'
-      });
-
-      if (creditError) {
-        console.error('Error adding credits:', creditError);
-        throw new Error('Failed to add credits');
-      }
+      // Note: Credits are added by the stripe-webhook function when payment_intent.succeeded 
+      // or checkout.session.completed events are received. We just verify here.
+      console.log(`Verified credit purchase: ${credits} credits for user ${userId}`);
 
       result.credits = credits;
       result.package_name = packageName;

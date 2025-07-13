@@ -30,13 +30,25 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 }) => {
   const fetchClientSecret = useCallback(async () => {
     try {
+      console.log('PaymentForm - fetchClientSecret called with:', { mode, selectedData, userId });
+      
       // Get Supabase session for auth
       const supabase = (await import('../../lib/supabase')).getSupabaseClient();
       const { data: { session } } = await supabase.auth.getSession();
       
+      console.log('PaymentForm - Session available:', !!session);
+      
       if (!session) {
         throw new Error('Not authenticated');
       }
+
+      const requestPayload = {
+        mode: mode === 'credits' ? 'payment' : 'subscription',
+        selectedData,
+        userId,
+      };
+      
+      console.log('PaymentForm - Sending request:', JSON.stringify(requestPayload, null, 2));
 
       // Create checkout session via Supabase Edge Function
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -47,11 +59,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
           'Content-Type': 'application/json',
           'Origin': window.location.origin,
         },
-        body: JSON.stringify({
-          mode: mode === 'credits' ? 'payment' : 'subscription',
-          selectedData,
-          userId,
-        }),
+        body: JSON.stringify(requestPayload),
       });
 
       if (!response.ok) {

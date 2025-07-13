@@ -24,8 +24,15 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+    console.log('Stripe Secret Key available:', !!stripeSecretKey);
+    
+    if (!stripeSecretKey) {
+      throw new Error('Stripe Secret Key not configured');
+    }
+    
     const stripe = new Stripe(
-      Deno.env.get('STRIPE_SECRET_KEY') ?? '',
+      stripeSecretKey,
       {
         apiVersion: '2023-10-16',
         httpClient: Stripe.createFetchHttpClient(),
@@ -47,7 +54,19 @@ Deno.serve(async (req: Request) => {
       throw new Error('Authentication required');
     }
 
-    const { mode, selectedData, userId }: CreateCheckoutSessionRequest = await req.json();
+    const requestBody = await req.json();
+    console.log('Request body received:', JSON.stringify(requestBody, null, 2));
+    
+    const { mode, selectedData, userId }: CreateCheckoutSessionRequest = requestBody;
+    
+    // Validate required fields
+    if (!mode || !selectedData || !userId) {
+      throw new Error(`Missing required fields: mode=${mode}, selectedData=${!!selectedData}, userId=${userId}`);
+    }
+    
+    if (!selectedData.name || !selectedData.price || !selectedData.credits) {
+      throw new Error(`Invalid selectedData: name=${selectedData.name}, price=${selectedData.price}, credits=${selectedData.credits}`);
+    }
 
     // Get user profile
     const { data: profile } = await supabaseClient
@@ -83,6 +102,13 @@ Deno.serve(async (req: Request) => {
 
     if (mode === 'payment') {
       // One-time payment for credits
+      console.log('Creating payment session with data:', {
+        selectedData,
+        price: selectedData.price,
+        credits: selectedData.credits,
+        name: selectedData.name
+      });
+      
       sessionParams = {
         ui_mode: 'embedded',
         mode: 'payment',
@@ -111,7 +137,11 @@ Deno.serve(async (req: Request) => {
     } else {
       // Subscription
       if (!selectedData.stripePriceId) {
-        throw new Error('Stripe Price ID required for subscription');
+        console.error('Missing Stripe Price ID for subscription:', {
+          selectedData,
+          stripePriceId: selectedData.stripePriceId
+        });
+        throw new Error(`Stripe Price ID required for subscription. Received: ${JSON.stringify(selectedData)}`);
       }
 
       sessionParams = {

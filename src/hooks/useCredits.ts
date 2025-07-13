@@ -37,15 +37,13 @@ export const useCredits = (userId?: string) => {
 
         if (profileError) throw profileError;
 
-        // Get subscription details
-        const { data: subscription, error: subscriptionError } = await supabase
+        // Get subscription details (optional - user might not have an active subscription)
+        const { data: subscription } = await supabase
           .from('user_subscriptions')
           .select('billing_cycle_end')
           .eq('user_id', userId)
           .eq('is_active', true)
-          .single();
-
-        if (subscriptionError) throw subscriptionError;
+          .maybeSingle(); // Use maybeSingle to avoid throwing error if no subscription exists
 
         setCreditInfo({
           availableCredits: (profile?.available_credits as number) || 0,
