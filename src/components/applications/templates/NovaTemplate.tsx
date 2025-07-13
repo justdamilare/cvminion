@@ -1,5 +1,7 @@
 import { Document, Page, StyleSheet, View, Text } from '@react-pdf/renderer';
 import { ResumeTemplate } from './TemplateBase';
+import { formatDateRange } from './dateUtils';
+import { getContactWithIcon, cleanLinkedInUrl } from './contactIcons';
 
 const styles = StyleSheet.create({
   page: {
@@ -170,18 +172,23 @@ export const NovaTemplate: ResumeTemplate = {
       certifications: true,
     },
   },
-  render: ({ resume, options }) => (
+  render: ({ resume, options = {} }) => {
+    const { showCompanyDescription = true, showKeyAchievements = true, showResponsibilities = true } = options;
+    
+    return (
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.name}>{resume.full_name}</Text>
-          <Text style={styles.title}>{resume.experience[0]?.position}</Text>
+          {resume.experience && resume.experience.length > 0 && resume.experience[0].position && (
+            <Text style={styles.title}>{resume.experience[0].position}</Text>
+          )}
           <View style={styles.contact}>
-            <Text>{resume.email}</Text>
-            <Text>{resume.phone_number}</Text>
-            <Text>{resume.address}</Text>
-            {resume.website && <Text>{resume.website}</Text>}
-            {resume.linkedin && <Text>{resume.linkedin}</Text>}
+                    {resume.email && <Text>{getContactWithIcon('email', resume.email, 'simple')}</Text>}
+        {resume.phone_number && <Text>{getContactWithIcon('phone', resume.phone_number, 'simple')}</Text>}
+        {resume.address && <Text>{getContactWithIcon('address', resume.address, 'simple')}</Text>}
+        {resume.website && <Text>{getContactWithIcon('website', resume.website.replace(/^https?:\/\//, ""), 'simple')}</Text>}
+        {resume.linkedin && <Text>{getContactWithIcon('linkedin', cleanLinkedInUrl(resume.linkedin), 'simple')}</Text>}
           </View>
         </View>
 
@@ -199,13 +206,18 @@ export const NovaTemplate: ResumeTemplate = {
               <View key={index} style={styles.experience}>
                 <Text style={styles.company}>{exp.company}</Text>
                 <Text style={styles.role}>{exp.position}</Text>
-                <Text style={styles.date}>
-                  {exp.start_date} - {exp.end_date || 'Present'}
-                </Text>
-                {options?.showCompanyDescription && exp.company_description && (
+                {exp.location && (
+                  <Text style={styles.role}>{exp.location}</Text>
+                )}
+                            {(exp.start_date || exp.end_date) && (
+              <Text style={styles.date}>
+                {formatDateRange(exp.start_date, exp.end_date)}
+              </Text>
+            )}
+                {showCompanyDescription && exp.company_description && (
                   <Text style={styles.description}>{exp.company_description}</Text>
                 )}
-                {options?.showKeyAchievements && exp.key_achievements && exp.key_achievements.length > 0 && (
+                {showKeyAchievements && exp.key_achievements && exp.key_achievements.length > 0 && (
                   <View>
                     {exp.key_achievements.map((achievement, i) => (
                       <View key={i} style={styles.bulletPoint}>
@@ -214,7 +226,7 @@ export const NovaTemplate: ResumeTemplate = {
                     ))}
                   </View>
                 )}
-                {options?.showResponsibilities && exp.responsibilities && exp.responsibilities.length > 0 && (
+                {showResponsibilities && exp.responsibilities && exp.responsibilities.length > 0 && (
                   <View>
                     {exp.responsibilities.map((responsibility, i) => (
                       <View key={i} style={styles.bulletPoint}>
@@ -233,13 +245,18 @@ export const NovaTemplate: ResumeTemplate = {
             <Text style={styles.sectionTitle}>Education</Text>
             {resume.education.map((edu, index) => (
               <View key={index} style={styles.education}>
-                <Text style={styles.degree}>{edu.degree}</Text>
+                <Text style={styles.degree}>{edu.degree} {edu.field}</Text>
                 <Text style={styles.institution}>{edu.institution}</Text>
-                <Text style={styles.date}>
-                  {edu.start_date} - {edu.end_date || 'Present'}
-                </Text>
-                {edu.other_details && (
-                  <Text style={styles.description}>{edu.other_details}</Text>
+                            {(edu.start_date || edu.end_date) && (
+              <Text style={styles.date}>
+                {formatDateRange(edu.start_date, edu.end_date)}
+              </Text>
+            )}
+                {edu.relevant_coursework && Array.isArray(edu.relevant_coursework) && edu.relevant_coursework.length > 0 && (
+                  <Text style={styles.description}>Relevant Coursework: {edu.relevant_coursework.join(', ')}</Text>
+                )}
+                {edu.other_details && Array.isArray(edu.other_details) && edu.other_details.length > 0 && (
+                  <Text style={styles.description}>{edu.other_details.join(', ')}</Text>
                 )}
               </View>
             ))}
@@ -279,10 +296,14 @@ export const NovaTemplate: ResumeTemplate = {
             {resume.projects.map((project, index) => (
               <View key={index} style={styles.projects}>
                 <Text style={styles.projectTitle}>{project.title}</Text>
-                <Text style={styles.date}>
-                  {project.start_date} - {project.end_date || 'Present'}
-                </Text>
-                <Text style={styles.description}>{project.description}</Text>
+                            {(project.start_date || project.end_date) && (
+              <Text style={styles.date}>
+                {formatDateRange(project.start_date, project.end_date)}
+              </Text>
+            )}
+                {project.description && (
+                  <Text style={styles.description}>{project.description}</Text>
+                )}
               </View>
             ))}
           </View>
@@ -294,14 +315,17 @@ export const NovaTemplate: ResumeTemplate = {
             {resume.certifications.map((cert, index) => (
               <View key={index} style={styles.certifications}>
                 <Text style={styles.certification}>{cert.name}</Text>
-                <Text style={styles.organization}>{cert.organization}</Text>
+                {cert.organization && (
+                  <Text style={styles.organization}>{cert.organization}</Text>
+                )}
               </View>
             ))}
           </View>
         )}
       </Page>
     </Document>
-  ),
+  );
+  },
   defaultOptions: {
     showCompanyDescription: true,
     showKeyAchievements: true,

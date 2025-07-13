@@ -9,6 +9,7 @@ import { ProfilePage } from './pages/Profile';
 import { Navbar } from './components/Navbar';
 import { ConnectSupabase } from './components/ui/ConnectSupabase';
 import { useAuth } from './hooks/useAuth';
+import { CheckoutReturn } from './components/payments/CheckoutReturn';
 
 function App() {
   const { isAuthenticated, isLoading, error } = useAuth();
@@ -44,6 +45,7 @@ function App() {
             path="/profile" 
             element={isAuthenticated ? <ProfilePage /> : <Navigate to="/signin" />} 
           />
+          <Route path="/checkout/return" element={<CheckoutReturn />} />
         </Routes>
         <Toaster position="top-right" />
       </div>

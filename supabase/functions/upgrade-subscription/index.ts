@@ -13,8 +13,8 @@ interface UpgradeRequest {
 
 const tierPricing = {
   free: 0,
-  plus: 9.99,
-  pro: 29.99
+  plus: 12.99,
+  pro: 39.99
 };
 
 const tierCredits = {

@@ -2,6 +2,8 @@
 
 import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
 import { ResumeTemplate } from './TemplateBase';
+import { formatDateRange } from './dateUtils';
+import { getContactWithIcon, cleanLinkedInUrl } from './contactIcons';
 
 // Register fonts
 Font.register({
@@ -184,20 +186,22 @@ export const ModernTemplate: ResumeTemplate = {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.name}>{resume.full_name}</Text>
-            <Text style={styles.title}>{resume.experience?.[0]?.position}</Text>
+            <Text style={styles.name}>{resume.full_name || 'Name not provided'}</Text>
+            {resume.experience && resume.experience.length > 0 && resume.experience[0].position && (
+              <Text style={styles.title}>{resume.experience[0].position}</Text>
+            )}
             <View style={styles.contactInfo}>
-              <Text style={styles.contactItem}>{resume.email}</Text>
-              <Text style={styles.contactItem}>{resume.phone_number}</Text>
-              <Text style={styles.contactItem}>{resume.address}</Text>
+              {resume.email && <Text style={styles.contactItem}>{getContactWithIcon('email', resume.email, 'simple')}</Text>}
+              {resume.phone_number && <Text style={styles.contactItem}>{getContactWithIcon('phone', resume.phone_number, 'simple')}</Text>}
+              {resume.address && <Text style={styles.contactItem}>{getContactWithIcon('address', resume.address, 'simple')}</Text>}
               {resume.website && (
                 <Text style={styles.contactItem}>
-                  <Text style={styles.link}>{resume.website.replace(/^https?:\/\//, "")}</Text>
+                  <Text style={styles.link}>{getContactWithIcon('website', resume.website.replace(/^https?:\/\//, ""), 'simple')}</Text>
                 </Text>
               )}
               {resume.linkedin && (
                 <Text style={styles.contactItem}>
-                  <Text style={styles.link}>LinkedIn</Text>
+                  <Text style={styles.link}>{getContactWithIcon('linkedin', cleanLinkedInUrl(resume.linkedin), 'simple')}</Text>
                 </Text>
               )}
             </View>
@@ -223,9 +227,11 @@ export const ModernTemplate: ResumeTemplate = {
                         <Text style={styles.jobTitle}>{exp.position}</Text>
                         <Text style={styles.company}>, {exp.company}</Text>
                       </Text>
-                      <Text style={styles.period}>
-                        {exp.start_date} - {exp.end_date || 'Present'}
-                      </Text>
+                                    {(exp.start_date || exp.end_date) && (
+                <Text style={styles.period}>
+                  {formatDateRange(exp.start_date, exp.end_date)}
+                </Text>
+              )}
                       {showCompanyDescription && exp.company_description && (
                         <Text style={styles.description}>{exp.company_description}</Text>
                       )}
@@ -257,11 +263,11 @@ export const ModernTemplate: ResumeTemplate = {
                       {project.description && (
                         <Text style={styles.description}>{project.description}</Text>
                       )}
-                      {project.start_date && project.end_date && (
-                        <Text style={styles.period}>
-                          {project.start_date} - {project.end_date}
-                        </Text>
-                      )}
+                                    {(project.start_date || project.end_date) && (
+                <Text style={styles.period}>
+                  {formatDateRange(project.start_date, project.end_date)}
+                </Text>
+              )}
                     </View>
                   ))}
                 </View>
@@ -278,11 +284,13 @@ export const ModernTemplate: ResumeTemplate = {
                       <Text style={styles.degree}>{edu.degree}</Text>
                       <Text style={styles.degree}>{edu.field}</Text>
                       <Text style={styles.institution}>{edu.institution}</Text>
-                      <Text style={styles.period}>
-                        {edu.start_date} - {edu.end_date || 'Present'}
-                      </Text>
-                      {edu.other_details && (
-                        <Text style={styles.description}>{edu.other_details}</Text>
+                                    {(edu.start_date || edu.end_date) && (
+                <Text style={styles.period}>
+                  {formatDateRange(edu.start_date, edu.end_date)}
+                </Text>
+              )}
+                      {edu.other_details && Array.isArray(edu.other_details) && edu.other_details.length > 0 && (
+                        <Text style={styles.description}>{edu.other_details.join(', ')}</Text>
                       )}
                       {index < resume.education.length - 1 && <View style={styles.divider} />}
                     </View>
@@ -327,7 +335,7 @@ export const ModernTemplate: ResumeTemplate = {
                     <View key={index} style={styles.bulletPoint}>
                       <Text style={styles.bullet}>•</Text>
                       <Text style={styles.description}>
-                        {certification.organization ? `${certification.name} - ${certification.organization}` : certification.name}
+                        {certification.name}{certification.organization ? ` - ${certification.organization}` : ''}
                       </Text>
                     </View>
                   ))}

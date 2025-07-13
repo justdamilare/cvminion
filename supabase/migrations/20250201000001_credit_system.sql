@@ -16,7 +16,7 @@
 */
 
 -- Create enum for subscription tiers
-CREATE TYPE subscription_tier AS ENUM ('free', 'pro', 'enterprise');
+CREATE TYPE subscription_tier AS ENUM ('free', 'plus', 'pro');
 
 -- Create enum for credit types
 CREATE TYPE credit_type AS ENUM ('monthly', 'purchased', 'bonus');

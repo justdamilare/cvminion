@@ -103,8 +103,8 @@ const ResumeSchema = z.object({
     institution: z.string(),
     start_date: z.string(),
     end_date: z.string(),
-    relevant_coursework: z.array(z.string()),
-    other_details: z.array(z.string()),
+    relevant_coursework: z.array(z.string()).optional(),
+    other_details: z.array(z.string()).optional(),
   })),
   languages: z.array(z.object({
     name: z.string(),
@@ -113,12 +113,12 @@ const ResumeSchema = z.object({
   projects: z.array(z.object({
     title: z.string(),
     description: z.string(),
-    start_date: z.string(),
-    end_date: z.string(),
+    start_date: z.string().nullable(),
+    end_date: z.string().nullable(),
   })),
   certifications: z.array(z.object({
     name: z.string(),
-    organization: z.string(),
+    organization: z.string().nullable(),
   })),
 });
 
@@ -178,12 +178,12 @@ function formatResume(data: Record<string, any>): Resume {
     projects: (data.projects || []).map((project: Project) => ({
       title: project.title || "",
       description: project.description || "",
-      start_date: formatDate(project.start_date || project.start_date || ""),
-      end_date: formatDate(project.end_date || project.end_date || "Present"),
+      start_date: project.start_date ? formatDate(project.start_date) : null,
+      end_date: project.end_date ? formatDate(project.end_date) : null,
     })),
     certifications: (data.certifications || []).map((cert: Certification) => ({
       name: cert.name || "",
-      organization: cert.organization || "",
+      organization: cert.organization || null,
     })),
   };
 }

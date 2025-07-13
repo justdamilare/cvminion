@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Coins, Check, Loader2, CreditCard } from 'lucide-react';
 import { formatPrice } from '../../types/credits';
 import { getSupabaseClient } from '../../lib/supabase';
-import { purchaseCredits } from '../../lib/credits';
+import { StripePaymentModal } from '../payments/StripePaymentModal';
 import { toast } from 'react-hot-toast';
 
 interface CreditPackage {
@@ -29,7 +29,7 @@ export const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
   const [packages, setPackages] = useState<CreditPackage[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [purchasing, setPurchasing] = useState(false);
+  const [showStripeModal, setShowStripeModal] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -65,30 +65,9 @@ export const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
     }
   };
 
-  const handlePurchase = async () => {
+  const handlePurchase = () => {
     if (!selectedPackage || !userId) return;
-
-    const selectedPkg = packages.find(p => p.id === selectedPackage);
-    if (!selectedPkg) return;
-
-    setPurchasing(true);
-    try {
-      // Use the Edge Function for credit purchase
-      const result = await purchaseCredits(userId, selectedPkg.id);
-      
-      if (!result.success) {
-        throw new Error(result.error || 'Purchase failed');
-      }
-
-      toast.success(`Successfully purchased ${selectedPkg.credits} credits!`);
-      onPurchaseSuccess?.();
-      onClose();
-    } catch (error) {
-      console.error('Error purchasing credits:', error);
-      toast.error('Failed to purchase credits. Please try again.');
-    } finally {
-      setPurchasing(false);
-    }
+    setShowStripeModal(true);
   };
 
   if (!isOpen) return null;
@@ -171,28 +150,34 @@ export const CreditPurchaseModal: React.FC<CreditPurchaseModalProps> = ({
               <button
                 onClick={onClose}
                 className="flex-1 bg-gray-700 text-white py-3 px-4 rounded-lg hover:bg-gray-600 transition-colors"
-                disabled={purchasing}
               >
                 Cancel
               </button>
               <button
                 onClick={handlePurchase}
-                disabled={!selectedPackage || purchasing}
+                disabled={!selectedPackage}
                 className="flex-1 bg-primary text-dark py-3 px-4 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
-                {purchasing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    Purchase Credits
-                  </>
-                )}
+                <CreditCard className="w-4 h-4 mr-2" />
+                Purchase Credits
               </button>
             </div>
+
+            {/* Stripe Payment Modal */}
+            {userId && (
+              <StripePaymentModal
+                isOpen={showStripeModal}
+                onClose={() => setShowStripeModal(false)}
+                userId={userId}
+                mode="credits"
+                selectedCredits={packages.find(p => p.id === selectedPackage)?.credits}
+                onSuccess={() => {
+                  setShowStripeModal(false);
+                  onPurchaseSuccess?.();
+                  onClose();
+                }}
+              />
+            )}
           </>
         )}
       </div>

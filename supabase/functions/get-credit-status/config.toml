@@ -1,0 +1,2 @@
+[functions.cvminion]
+verify_jwt = true 
