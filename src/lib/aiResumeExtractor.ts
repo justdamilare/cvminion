@@ -3,7 +3,7 @@
  * Uses OpenAI API to intelligently extract structured data from resume text
  */
 
-import type { Profile, Education, Experience, Skill, Language, Project, Certification } from '../types/profile';
+import type { Education, Experience, Skill, Language, Project, Certification } from '../types/profile';
 import type { SkillLevel, LanguageLevel } from '../types/application';
 
 export interface ExtractedResumeData {
@@ -49,7 +49,7 @@ export interface AIExtractionOptions {
 const DEFAULT_OPTIONS: AIExtractionOptions = {
   model: 'gpt-3.5-turbo',
   temperature: 0.1,
-  maxTokens: 4000,
+  maxTokens: 3000, // Reduced to avoid token limit issues
   enableFallbackParsing: true,
 };
 
@@ -63,13 +63,26 @@ export const extractResumeDataWithAI = async (
   const opts = { ...DEFAULT_OPTIONS, ...options };
   
   try {
-    // If no API key provided, use fallback parsing
-    if (!opts.apiKey) {
-      console.warn('No OpenAI API key provided, using fallback parsing');
-      return await fallbackResumeExtraction(resumeText);
-    }
+    // Try Supabase Edge Function first, fallback to direct OpenAI if needed
+    let extractedData: ExtractedResumeData;
     
-    const extractedData = await extractWithOpenAI(resumeText, opts);
+    try {
+      extractedData = await extractWithSupabaseFunction(resumeText);
+    } catch (supabaseError) {
+      console.warn('Supabase function failed, trying direct OpenAI:', supabaseError);
+      
+      // Fallback to direct OpenAI call with improved prompts
+      if (!opts.apiKey) {
+        const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+        if (apiKey) {
+          opts.apiKey = apiKey;
+        } else {
+          throw new Error('No OpenAI API key available');
+        }
+      }
+      
+      extractedData = await extractWithImprovedOpenAI(resumeText, opts);
+    }
     
     // Validate and clean the extracted data
     return validateAndCleanData(extractedData);
@@ -87,13 +100,105 @@ export const extractResumeDataWithAI = async (
 };
 
 /**
- * Extract data using OpenAI API
+ * Extract data using Supabase Edge Function (secure)
  */
-const extractWithOpenAI = async (
+const extractWithSupabaseFunction = async (resumeText: string): Promise<ExtractedResumeData> => {
+  const { getSupabaseClient } = await import('./supabase');
+  const supabase = getSupabaseClient();
+  
+  // Get the user's session for authentication
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    throw new Error('User not authenticated');
+  }
+
+  const response = await fetch(`${supabase.supabaseUrl}/functions/v1/ai-resume-extract`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+      'apikey': supabase.supabaseKey,
+    },
+    body: JSON.stringify({
+      resumeText
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(`AI extraction failed: ${response.status} - ${errorData.error || 'Unknown error'}`);
+  }
+
+  const data = await response.json();
+  
+  // Check if fallback was used
+  if (data.fallback) {
+    throw new Error(data.error || 'AI extraction failed, using fallback');
+  }
+  
+  return data;
+};
+
+/**
+ * Improved OpenAI extraction with latest best practices
+ */
+const extractWithImprovedOpenAI = async (
   resumeText: string,
   options: AIExtractionOptions
 ): Promise<ExtractedResumeData> => {
-  const prompt = options.customPrompt || createExtractionPrompt(resumeText);
+  // Validate API key
+  if (!options.apiKey || !options.apiKey.startsWith('sk-')) {
+    throw new Error('Invalid OpenAI API key format');
+  }
+
+  // Truncate resume text if too long - increased limit for better extraction
+  const maxResumeLength = 12000; 
+  const truncatedText = resumeText.length > maxResumeLength 
+    ? resumeText.substring(0, maxResumeLength) + '...'
+    : resumeText;
+
+  const systemPrompt = `You are an expert resume parser with deep understanding of professional documents. Your task is to extract structured data from resumes with maximum accuracy and attention to detail.
+
+CRITICAL REQUIREMENTS:
+1. Return ONLY valid JSON that matches the exact schema provided
+2. Extract ALL information present - do not miss any details
+3. For missing information, use null (not empty strings)
+4. Pay special attention to names, job titles, companies, and dates
+5. Ensure all dates are in YYYY-MM-DD format
+6. Be thorough with work experience and skills extraction
+
+EXTRACTION PRIORITIES:
+- Personal information (name, contact details, job title)
+- Complete work history with accurate dates and descriptions
+- All skills mentioned (technical and soft skills)
+- Education background
+- Projects and certifications if present`;
+
+  const userPrompt = createImprovedExtractionPrompt(truncatedText);
+  
+  const requestBody = {
+    model: 'gpt-4o-mini', // Latest and most cost-effective model
+    messages: [
+      {
+        role: 'system',
+        content: systemPrompt
+      },
+      {
+        role: 'user',
+        content: userPrompt
+      }
+    ],
+    temperature: 0.1, // Low temperature for consistent extraction
+    max_tokens: 4000, // Increased for comprehensive extraction
+    response_format: { type: "json_object" as const } // Ensure JSON response
+  };
+
+  console.log('Improved OpenAI API Request:', {
+    model: requestBody.model,
+    messageCount: requestBody.messages.length,
+    textLength: truncatedText.length,
+    maxTokens: requestBody.max_tokens
+  });
   
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -101,25 +206,20 @@ const extractWithOpenAI = async (
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${options.apiKey}`,
     },
-    body: JSON.stringify({
-      model: options.model,
-      messages: [
-        {
-          role: 'system',
-          content: `You are an expert resume parser. Extract structured data from resumes with high accuracy. Always return valid JSON that matches the exact schema provided. If information is unclear or missing, use null or empty arrays rather than making assumptions.`
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      temperature: options.temperature,
-      max_tokens: options.maxTokens,
-    }),
+    body: JSON.stringify(requestBody),
   });
   
   if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+    let errorMessage = `OpenAI API error: ${response.status} ${response.statusText}`;
+    try {
+      const errorData = await response.json();
+      if (errorData.error) {
+        errorMessage += ` - ${errorData.error.message || errorData.error.code || 'Unknown error'}`;
+      }
+    } catch {
+      // If we can't parse the error response, just use the status
+    }
+    throw new Error(errorMessage);
   }
   
   const data = await response.json();
@@ -132,6 +232,86 @@ const extractWithOpenAI = async (
   try {
     return JSON.parse(content);
   } catch (parseError) {
+    console.error('Failed to parse OpenAI response:', parseError);
+    throw new Error('Failed to parse AI response as JSON');
+  }
+};
+
+/**
+ * Extract data using OpenAI API (DEPRECATED - use improved version)
+ */
+const extractWithOpenAI = async (
+  resumeText: string,
+  options: AIExtractionOptions
+): Promise<ExtractedResumeData> => {
+  // Validate API key
+  if (!options.apiKey || !options.apiKey.startsWith('sk-')) {
+    throw new Error('Invalid OpenAI API key format');
+  }
+
+  // Truncate resume text if too long to avoid token limits
+  const maxResumeLength = 8000; // Conservative limit
+  const truncatedText = resumeText.length > maxResumeLength 
+    ? resumeText.substring(0, maxResumeLength) + '...'
+    : resumeText;
+
+  const prompt = options.customPrompt || createExtractionPrompt(truncatedText);
+  
+  const requestBody = {
+    model: options.model,
+    messages: [
+      {
+        role: 'system',
+        content: `You are an expert resume parser. Extract structured data from resumes with high accuracy. Always return valid JSON that matches the exact schema provided. If information is unclear or missing, use null or empty arrays rather than making assumptions.`
+      },
+      {
+        role: 'user',
+        content: prompt
+      }
+    ],
+    temperature: options.temperature,
+    max_tokens: options.maxTokens,
+  };
+
+  console.log('OpenAI API Request:', {
+    model: requestBody.model,
+    messageCount: requestBody.messages.length,
+    promptLength: prompt.length,
+    maxTokens: requestBody.max_tokens
+  });
+  
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${options.apiKey}`,
+    },
+    body: JSON.stringify(requestBody),
+  });
+  
+  if (!response.ok) {
+    let errorMessage = `OpenAI API error: ${response.status} ${response.statusText}`;
+    try {
+      const errorData = await response.json();
+      if (errorData.error) {
+        errorMessage += ` - ${errorData.error.message || errorData.error.code || 'Unknown error'}`;
+      }
+    } catch {
+      // If we can't parse the error response, just use the status
+    }
+    throw new Error(errorMessage);
+  }
+  
+  const data = await response.json();
+  const content = data.choices[0]?.message?.content;
+  
+  if (!content) {
+    throw new Error('No content received from OpenAI API');
+  }
+  
+  try {
+    return JSON.parse(content);
+  } catch {
     // Try to extract JSON from the response if it's wrapped in markdown
     const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
     if (jsonMatch) {
@@ -142,7 +322,98 @@ const extractWithOpenAI = async (
 };
 
 /**
- * Create the extraction prompt for OpenAI
+ * Create improved extraction prompt with better instructions
+ */
+const createImprovedExtractionPrompt = (resumeText: string): string => {
+  return `Extract ALL data from this resume into the following JSON schema. Be extremely thorough and accurate, especially with personal information and work experience:
+
+{
+  "personalInfo": {
+    "fullName": "string or null",
+    "email": "string or null", 
+    "phone": "string or null",
+    "address": "string or null",
+    "website": "string or null",
+    "linkedin": "string or null",
+    "github": "string or null",
+    "title": "string or null",
+    "summary": "string or null"
+  },
+  "experience": [
+    {
+      "company": "string",
+      "position": "string", 
+      "start_date": "YYYY-MM-DD",
+      "end_date": "YYYY-MM-DD or null for current",
+      "company_description": "string",
+      "highlights": ["array of key achievements and responsibilities"]
+    }
+  ],
+  "education": [
+    {
+      "institution": "string",
+      "degree": "string",
+      "field": "string", 
+      "start_date": "YYYY-MM-DD",
+      "end_date": "YYYY-MM-DD or null",
+      "description": "string or null"
+    }
+  ],
+  "skills": [
+    {
+      "name": "string",
+      "level": "beginner|intermediate|advanced|expert"
+    }
+  ],
+  "languages": [
+    {
+      "name": "string", 
+      "level": "elementary|limited_working|professional_working|full_professional|native"
+    }
+  ],
+  "projects": [
+    {
+      "title": "string",
+      "start_date": "YYYY-MM-DD or null",
+      "end_date": "YYYY-MM-DD or null"
+    }
+  ],
+  "certifications": [
+    {
+      "name": "string",
+      "organization": "string or null"
+    }
+  ],
+  "confidence": {
+    "overall": 85,
+    "personalInfo": 95,
+    "experience": 90, 
+    "education": 85,
+    "skills": 75,
+    "languages": 80,
+    "projects": 70,
+    "certifications": 85
+  },
+  "warnings": ["array of any extraction issues or uncertainties"]
+}
+
+IMPORTANT EXTRACTION GUIDELINES:
+- Extract the person's FULL NAME from the header/top of the resume
+- Find ALL contact information (email, phone, address, LinkedIn, etc.)
+- Extract EVERY job position with complete details
+- Include ALL skills mentioned, both technical and soft skills
+- Convert all dates to YYYY-MM-DD format (use 01 for day if only month/year given)
+- For current positions, set end_date to null
+- Extract all education details with institutions and degrees
+- Include any projects or certifications mentioned
+- Provide confidence scores based on how clear the information is
+
+RESUME TEXT:
+${resumeText}`;
+};
+
+/**
+ * Create the extraction prompt for OpenAI (DEPRECATED)
  */
 const createExtractionPrompt = (resumeText: string): string => {
   return `Extract structured data from the following resume text. Return a JSON object that exactly matches this schema:
@@ -236,7 +507,7 @@ ${resumeText}`;
  * Fallback extraction using rule-based parsing
  */
 const fallbackResumeExtraction = async (resumeText: string): Promise<ExtractedResumeData> => {
-  const lines = resumeText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+  // Note: lines variable was removed as it's not used in the current implementation
   
   const result: ExtractedResumeData = {
     personalInfo: {},
@@ -347,7 +618,7 @@ const extractExperienceFallback = (text: string): Omit<Experience, 'id'>[] => {
           position,
           company,
           start_date: '2020-01-01', // Default date
-          end_date: null,
+          end_date: undefined,
           company_description: company,
           highlights: [],
         });

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { 
   User, 
   Briefcase, 
@@ -14,10 +14,16 @@ import {
   FileText,
   Award,
   Languages,
-  FolderOpen
+  FolderOpen,
+  Download,
+  Upload,
+  Brain,
+  Zap
 } from 'lucide-react';
 import { Profile, CreateProfileData } from '../../types/profile';
 import { EditableField } from '../ui/EditableField';
+import { LinkedInImport } from './LinkedInImport';
+import { PDFResumeImport } from './PDFResumeImport';
 
 interface WizardStep {
   id: string;
@@ -35,7 +41,144 @@ interface GuidedProfileWizardProps {
   isNewUser?: boolean;
 }
 
-export const GuidedProfileWizard: React.FC<GuidedProfileWizardProps> = ({
+type ImportChoice = 'manual' | 'linkedin' | 'pdf' | null;
+
+// Move step components outside to prevent re-creation on each render
+const PersonalInfoStep: React.FC<{ 
+  data: Partial<Profile>; 
+  onChange: (data: Partial<Profile>) => void;
+  onBlur: (data: Partial<Profile>) => void;
+}> = React.memo(({ data, onChange, onBlur }) => (
+  <div className="space-y-6">
+    <div className="text-center mb-8">
+      <User className="w-16 h-16 text-primary mx-auto mb-4" />
+      <h2 className="text-2xl font-bold text-white mb-2">Let's start with the basics</h2>
+      <p className="text-gray-400">Tell us about yourself so we can create your professional profile</p>
+    </div>
+
+    <div className="grid md:grid-cols-2 gap-6">
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Full Name *</label>
+          <input
+            type="text"
+            value={data.full_name || ''}
+            onChange={(e) => onChange({ full_name: e.target.value })}
+            onBlur={(e) => onBlur({ full_name: e.target.value })}
+            className="w-full bg-dark text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none border border-gray-700"
+            placeholder="John Doe"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
+          <input
+            type="email"
+            value={data.email || ''}
+            onChange={(e) => onChange({ email: e.target.value })}
+            onBlur={(e) => onBlur({ email: e.target.value })}
+            className="w-full bg-dark text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none border border-gray-700"
+            placeholder="john@example.com"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number *</label>
+          <input
+            type="tel"
+            value={data.phone_number || ''}
+            onChange={(e) => onChange({ phone_number: e.target.value })}
+            onBlur={(e) => onBlur({ phone_number: e.target.value })}
+            className="w-full bg-dark text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none border border-gray-700"
+            placeholder="+1 (555) 123-4567"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Professional Title *</label>
+          <input
+            type="text"
+            value={data.title || ''}
+            onChange={(e) => onChange({ title: e.target.value })}
+            onBlur={(e) => onBlur({ title: e.target.value })}
+            className="w-full bg-dark text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none border border-gray-700"
+            placeholder="Software Engineer"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Location *</label>
+          <input
+            type="text"
+            value={data.address || ''}
+            onChange={(e) => onChange({ address: e.target.value })}
+            onBlur={(e) => onBlur({ address: e.target.value })}
+            className="w-full bg-dark text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none border border-gray-700"
+            placeholder="San Francisco, CA"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">LinkedIn Profile</label>
+          <input
+            type="url"
+            value={data.linkedin || ''}
+            onChange={(e) => onChange({ linkedin: e.target.value })}
+            onBlur={(e) => onBlur({ linkedin: e.target.value })}
+            className="w-full bg-dark text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none border border-gray-700"
+            placeholder="https://linkedin.com/in/johndoe"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+));
+
+// Professional Summary Step Component
+const SummaryStep: React.FC<{ 
+  data: Partial<Profile>; 
+  onChange: (data: Partial<Profile>) => void;
+  onBlur: (data: Partial<Profile>) => void;
+}> = React.memo(({ data, onChange, onBlur }) => (
+  <div className="space-y-6">
+    <div className="text-center mb-8">
+      <FileText className="w-16 h-16 text-primary mx-auto mb-4" />
+      <h2 className="text-2xl font-bold text-white mb-2">Tell your professional story</h2>
+      <p className="text-gray-400">Write a compelling summary that highlights your key strengths and career objectives (optional)</p>
+    </div>
+
+    <div>
+      <label className="block text-sm font-medium text-gray-300 mb-2">
+        Professional Summary
+        <span className="text-xs text-gray-500 ml-2">
+          ({(data.summary || '').length}/500 characters)
+        </span>
+      </label>
+      <textarea
+        value={data.summary || ''}
+        onChange={(e) => onChange({ summary: e.target.value })}
+        onBlur={(e) => onBlur({ summary: e.target.value })}
+        className="w-full h-40 bg-dark text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none resize-none border border-gray-700"
+        placeholder="I am a passionate software engineer with 5+ years of experience in full-stack development. I specialize in React, Node.js, and cloud technologies, with a track record of delivering high-quality solutions that drive business growth..."
+        maxLength={500}
+      />
+    </div>
+
+    <div className="bg-gray-800/50 rounded-lg p-4">
+      <h3 className="text-sm font-medium text-white mb-2">💡 Tips for a great summary:</h3>
+      <ul className="text-sm text-gray-400 space-y-1">
+        <li>• Start with your current role and years of experience</li>
+        <li>• Highlight your key skills and technologies</li>
+        <li>• Mention notable achievements or projects</li>
+        <li>• End with your career goals or what you're looking for</li>
+      </ul>
+    </div>
+  </div>
+));
+
+export const GuidedProfileWizard: React.FC<GuidedProfileWizardProps> = React.memo(({
   profile,
   onUpdate,
   onComplete,
@@ -43,146 +186,169 @@ export const GuidedProfileWizard: React.FC<GuidedProfileWizardProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [profileData, setProfileData] = useState<Partial<Profile>>(profile || {});
-  const [saving, setSaving] = useState(false);
+  const [importChoice, setImportChoice] = useState<ImportChoice>(null);
+  const [showLinkedInModal, setShowLinkedInModal] = useState(false);
+  const [showPDFModal, setShowPDFModal] = useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const profileDataRef = useRef<Partial<Profile>>(profile || {});
 
-  // Auto-save function with debouncing
+  // Update ref when profileData changes
+  React.useEffect(() => {
+    profileDataRef.current = profileData;
+  }, [profileData]);
+
+  // Auto-save function that properly saves data
   const autoSave = useCallback(async (data: Partial<Profile>) => {
     try {
-      setSaving(true);
+      // Use the proper onUpdate function to ensure data is saved correctly
       await onUpdate(data);
-      setProfileData(prev => ({ ...prev, ...data }));
     } catch (error) {
       console.error('Auto-save failed:', error);
-    } finally {
-      setSaving(false);
     }
   }, [onUpdate]);
 
-  // Personal Information Step Component
-  const PersonalInfoStep: React.FC<{ data: Partial<Profile>; onChange: (data: Partial<Profile>) => void }> = ({ 
+  // Import Choice Step Component
+  const ImportChoiceStep: React.FC<{ data: Partial<Profile>; onChange: (data: Partial<Profile>) => void }> = ({ 
     data, 
     onChange 
-  }) => (
-    <div className="space-y-6">
-      <div className="text-center mb-8">
-        <User className="w-16 h-16 text-primary mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-white mb-2">Let's start with the basics</h2>
-        <p className="text-gray-400">Tell us about yourself so we can create your professional profile</p>
-      </div>
+  }) => {
+    const handleImportComplete = async (importedData: Partial<Profile>) => {
+      const mergedData = { ...data, ...importedData };
+      onChange(mergedData);
+      setImportChoice('manual'); // Continue with manual steps after import
+      await autoSave(mergedData);
+      // Skip to summary step if basic info is complete
+      if (importedData.full_name && importedData.email) {
+        setCurrentStep(2); // Skip to summary step
+      } else {
+        setCurrentStep(1); // Go to personal info step
+      }
+    };
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Full Name *</label>
-            <input
-              type="text"
-              value={data.full_name || ''}
-              onChange={(e) => onChange({ full_name: e.target.value })}
-              className="w-full bg-dark text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none border border-gray-700"
-              placeholder="John Doe"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
-            <input
-              type="email"
-              value={data.email || ''}
-              onChange={(e) => onChange({ email: e.target.value })}
-              className="w-full bg-dark text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none border border-gray-700"
-              placeholder="john@example.com"
-            />
+    return (
+      <div className="space-y-6">
+        <div className="text-center mb-8">
+          <Zap className="w-16 h-16 text-primary mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2">Quick Setup</h2>
+          <p className="text-gray-400">
+            Import your professional data from LinkedIn or upload your PDF resume to quickly populate your profile.
+          </p>
+        </div>
+
+        {/* Import Options */}
+        <div className="space-y-4 max-w-2xl mx-auto">
+          <div className="bg-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center">
+                <Download className="w-8 h-8 text-primary" />
+              </div>
+              <div>
+                <h4 className="text-white font-semibold text-lg mb-2">Import from LinkedIn</h4>
+                <p className="text-gray-400 text-sm mb-4 max-w-md">
+                  Upload your LinkedIn data export to automatically fill in your experience, education, skills, and more.
+                </p>
+                <div className="flex items-center justify-center gap-4 text-xs text-gray-500 mb-4">
+                  <div className="flex items-center gap-1">
+                    <Zap className="w-3 h-3" />
+                    <span>Instant setup</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <FileText className="w-3 h-3" />
+                    <span>Supports ZIP & JSON</span>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowLinkedInModal(true)}
+                className="w-full max-w-xs px-6 py-3 bg-primary text-dark font-semibold rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Import LinkedIn Data
+              </button>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number *</label>
-            <input
-              type="tel"
-              value={data.phone_number || ''}
-              onChange={(e) => onChange({ phone_number: e.target.value })}
-              className="w-full bg-dark text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none border border-gray-700"
-              placeholder="+1 (555) 123-4567"
-            />
+          <div className="bg-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-16 h-16 bg-green-500/20 rounded-lg flex items-center justify-center">
+                <Upload className="w-8 h-8 text-green-500" />
+              </div>
+              <div>
+                <h4 className="text-white font-semibold text-lg mb-2">Import PDF Resume</h4>
+                <p className="text-gray-400 text-sm mb-4 max-w-md">
+                  Upload your existing PDF resume and let our AI extract your experience, education, skills, and more automatically.
+                </p>
+                <div className="flex items-center justify-center gap-4 text-xs text-gray-500 mb-4">
+                  <div className="flex items-center gap-1">
+                    <Brain className="w-3 h-3" />
+                    <span>AI-powered extraction</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <FileText className="w-3 h-3" />
+                    <span>PDF files only</span>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowPDFModal(true)}
+                className="w-full max-w-xs px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Upload PDF Resume
+              </button>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-700"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-dark-light text-gray-400">or</span>
+            </div>
+          </div>
+
+          <div className="bg-dark rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-16 h-16 bg-gray-500/20 rounded-lg flex items-center justify-center">
+                <User className="w-8 h-8 text-gray-400" />
+              </div>
+              <div>
+                <h4 className="text-white font-semibold text-lg mb-2">Manual Setup</h4>
+                <p className="text-gray-400 text-sm mb-4 max-w-md">
+                  Fill out your profile step by step with our guided wizard.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setImportChoice('manual');
+                  setCurrentStep(1);
+                }}
+                className="w-full max-w-xs px-6 py-3 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                Start Manual Setup
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Professional Title *</label>
-            <input
-              type="text"
-              value={data.title || ''}
-              onChange={(e) => onChange({ title: e.target.value })}
-              className="w-full bg-dark text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none border border-gray-700"
-              placeholder="Software Engineer"
-            />
-          </div>
+        {/* Import Modals */}
+        {showLinkedInModal && (
+          <LinkedInImport 
+            onImport={handleImportComplete} 
+            onClose={() => setShowLinkedInModal(false)} 
+          />
+        )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Location *</label>
-            <input
-              type="text"
-              value={data.address || ''}
-              onChange={(e) => onChange({ address: e.target.value })}
-              className="w-full bg-dark text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none border border-gray-700"
-              placeholder="San Francisco, CA"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">LinkedIn Profile</label>
-            <input
-              type="url"
-              value={data.linkedin || ''}
-              onChange={(e) => onChange({ linkedin: e.target.value })}
-              className="w-full bg-dark text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none border border-gray-700"
-              placeholder="https://linkedin.com/in/johndoe"
-            />
-          </div>
-        </div>
+        {showPDFModal && (
+          <PDFResumeImport 
+            onImport={handleImportComplete} 
+            onClose={() => setShowPDFModal(false)} 
+          />
+        )}
       </div>
-    </div>
-  );
+    );
+  };
 
-  // Professional Summary Step Component
-  const SummaryStep: React.FC<{ data: Partial<Profile>; onChange: (data: Partial<Profile>) => void }> = ({ 
-    data, 
-    onChange 
-  }) => (
-    <div className="space-y-6">
-      <div className="text-center mb-8">
-        <FileText className="w-16 h-16 text-primary mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-white mb-2">Tell your professional story</h2>
-        <p className="text-gray-400">Write a compelling summary that highlights your key strengths and career objectives</p>
-      </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
-          Professional Summary * 
-          <span className="text-xs text-gray-500 ml-2">
-            ({(data.summary || '').length}/500 characters)
-          </span>
-        </label>
-        <textarea
-          value={data.summary || ''}
-          onChange={(e) => onChange({ summary: e.target.value })}
-          className="w-full h-40 bg-dark text-white px-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none resize-none border border-gray-700"
-          placeholder="I am a passionate software engineer with 5+ years of experience in full-stack development. I specialize in React, Node.js, and cloud technologies, with a track record of delivering high-quality solutions that drive business growth..."
-          maxLength={500}
-        />
-      </div>
-
-      <div className="bg-gray-800/50 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-white mb-2">💡 Tips for a great summary:</h3>
-        <ul className="text-sm text-gray-400 space-y-1">
-          <li>• Start with your current role and years of experience</li>
-          <li>• Highlight your key skills and technologies</li>
-          <li>• Mention notable achievements or projects</li>
-          <li>• End with your career goals or what you're looking for</li>
-        </ul>
-      </div>
-    </div>
-  );
 
   // Experience Step Component
   const ExperienceStep: React.FC<{ data: Partial<Profile>; onChange: (data: Partial<Profile>) => void }> = ({ 
@@ -421,8 +587,16 @@ export const GuidedProfileWizard: React.FC<GuidedProfileWizardProps> = ({
   // Define wizard steps
   const steps: WizardStep[] = [
     {
+      id: 'import',
+      title: 'Quick Setup',
+      description: 'Choose how to build your profile',
+      icon: Zap,
+      component: ImportChoiceStep,
+      isComplete: (data) => importChoice !== null
+    },
+    {
       id: 'personal',
-      title: 'Personal Information',
+      title: 'Personal Info',
       description: 'Basic contact details and professional title',
       icon: User,
       component: PersonalInfoStep,
@@ -430,15 +604,15 @@ export const GuidedProfileWizard: React.FC<GuidedProfileWizardProps> = ({
     },
     {
       id: 'summary',
-      title: 'Professional Summary',
-      description: 'Tell your professional story',
+      title: 'Summary',
+      description: 'Tell your professional story (optional)',
       icon: FileText,
       component: SummaryStep,
-      isComplete: (data) => !!(data.summary && data.summary.length > 50)
+      isComplete: () => true // Make summary optional
     },
     {
       id: 'experience',
-      title: 'Work Experience',
+      title: 'Experience',
       description: 'Your professional background',
       icon: Briefcase,
       component: ExperienceStep,
@@ -446,7 +620,7 @@ export const GuidedProfileWizard: React.FC<GuidedProfileWizardProps> = ({
     },
     {
       id: 'skills',
-      title: 'Skills & Expertise',
+      title: 'Skills',
       description: 'Showcase your abilities',
       icon: Star,
       component: SkillsStep,
@@ -455,7 +629,7 @@ export const GuidedProfileWizard: React.FC<GuidedProfileWizardProps> = ({
   ];
 
   const currentStepData = steps[currentStep];
-  const StepComponent = currentStepData.component;
+  const StepComponent = useMemo(() => currentStepData.component, [currentStepData.component]);
 
   const handleNext = async () => {
     await autoSave(profileData);
@@ -472,12 +646,36 @@ export const GuidedProfileWizard: React.FC<GuidedProfileWizardProps> = ({
     }
   };
 
-  const updateStepData = (data: Partial<Profile>) => {
-    const updatedData = { ...profileData, ...data };
-    setProfileData(updatedData);
-    // Auto-save after a short delay
-    setTimeout(() => autoSave(updatedData), 1000);
-  };
+  // Debounced save for onChange events - use ref to avoid dependency on profileData
+  const debouncedSave = useCallback((data: Partial<Profile>) => {
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    // Set new timeout for debounced save (2 seconds after typing stops)
+    saveTimeoutRef.current = setTimeout(() => {
+      const updatedData = { ...profileDataRef.current, ...data };
+      autoSave(updatedData);
+    }, 2000);
+  }, [autoSave]);
+
+  const updateStepData = useCallback((data: Partial<Profile>) => {
+    setProfileData(prev => ({ ...prev, ...data }));
+    // Trigger debounced save when data changes
+    debouncedSave(data);
+  }, [debouncedSave]);
+
+  const saveOnBlur = useCallback((data: Partial<Profile>) => {
+    // Clear any pending save
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    // Save immediately on blur using current ref data
+    const updatedData = { ...profileDataRef.current, ...data };
+    autoSave(updatedData);
+  }, [autoSave]);
 
   const isCurrentStepComplete = currentStepData.isComplete(profileData);
   const completedSteps = steps.filter(step => step.isComplete(profileData)).length;
@@ -548,6 +746,7 @@ export const GuidedProfileWizard: React.FC<GuidedProfileWizardProps> = ({
         <StepComponent 
           data={profileData} 
           onChange={updateStepData}
+          onBlur={saveOnBlur}
         />
       </div>
 
@@ -563,8 +762,13 @@ export const GuidedProfileWizard: React.FC<GuidedProfileWizardProps> = ({
         </button>
 
         <div className="flex items-center gap-4">
-          {saving && (
-            <div className="text-sm text-gray-400">Saving...</div>
+          {currentStep > 0 && (
+            <button
+              onClick={() => autoSave(profileData)}
+              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
+            >
+              Save Progress
+            </button>
           )}
           
           <button
@@ -579,4 +783,4 @@ export const GuidedProfileWizard: React.FC<GuidedProfileWizardProps> = ({
       </div>
     </div>
   );
-};
+});
