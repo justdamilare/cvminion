@@ -39,12 +39,7 @@ export const Hero = () => {
             </Link>
           </GradientBorder>
           
-          <Link
-            to="/demo"
-            className="text-white hover:text-primary transition-colors px-8 py-4 rounded-lg font-bold text-lg inline-flex items-center"
-          >
-            See Demo
-          </Link>
+          
         </div>
       </FadeIn>
     </div>

@@ -222,7 +222,7 @@ export const LinkedInImport: React.FC<LinkedInImportProps> = ({ onImport, onClos
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <div>
-            <h2 className="text-xl font-semibold text-white">Import from LinkedIn</h2>
+            <h2 className="text-xl font-semibold text-white">Import from LinkedIn (beta)</h2>
             <p className="text-gray-400 text-sm mt-1">
               Upload your LinkedIn export file to quickly populate your profile
             </p>

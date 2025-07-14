@@ -2,19 +2,11 @@ import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { 
   User, 
   Briefcase, 
-  GraduationCap, 
   Star, 
   ArrowRight, 
   ArrowLeft, 
   Check,
-  Globe,
-  Mail,
-  Phone,
-  MapPin,
   FileText,
-  Award,
-  Languages,
-  FolderOpen,
   Download,
   Upload,
   Brain,
@@ -243,7 +235,7 @@ export const GuidedProfileWizard: React.FC<GuidedProfileWizardProps> = React.mem
                 <Download className="w-8 h-8 text-primary" />
               </div>
               <div>
-                <h4 className="text-white font-semibold text-lg mb-2">Import from LinkedIn</h4>
+                <h4 className="text-white font-semibold text-lg mb-2">Import from LinkedIn (beta)</h4>
                 <p className="text-gray-400 text-sm mb-4 max-w-md">
                   Upload your LinkedIn data export to automatically fill in your experience, education, skills, and more.
                 </p>
@@ -273,7 +265,7 @@ export const GuidedProfileWizard: React.FC<GuidedProfileWizardProps> = React.mem
                 <Upload className="w-8 h-8 text-green-500" />
               </div>
               <div>
-                <h4 className="text-white font-semibold text-lg mb-2">Import PDF Resume</h4>
+                <h4 className="text-white font-semibold text-lg mb-2">Import PDF Resume (beta)</h4>
                 <p className="text-gray-400 text-sm mb-4 max-w-md">
                   Upload your existing PDF resume and let our AI extract your experience, education, skills, and more automatically.
                 </p>

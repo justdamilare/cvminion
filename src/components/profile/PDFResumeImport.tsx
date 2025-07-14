@@ -230,7 +230,7 @@ export const PDFResumeImport: React.FC<PDFResumeImportProps> = ({ onImport, onCl
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-gray-900 rounded-lg max-w-md w-full p-6 border border-gray-700">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-semibold text-white">Import PDF Resume</h3>
+            <h3 className="text-xl font-semibold text-white">Import PDF Resume (beta)</h3>
             <button onClick={onClose} className="text-gray-400 hover:text-white">
               <X className="w-6 h-6" />
             </button>

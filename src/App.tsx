@@ -14,6 +14,7 @@ import { GuidedProfileWizard } from './components/profile/GuidedProfileWizard';
 import { useAuth } from './hooks/useAuth';
 import { useProfile } from './hooks/useProfile';
 import { CheckoutReturn } from './components/payments/CheckoutReturn';
+import { Profile } from './types/profile';
 
 // Profile Wizard Page Component
 const ProfileWizardPage = () => {
@@ -24,12 +25,16 @@ const ProfileWizardPage = () => {
     navigate('/profile', { replace: true });
   };
 
+  const handleUpdate = async (data: Partial<Profile>) => {
+    await updateProfile(data);
+  };
+
   return (
     <div className="min-h-screen bg-dark p-6">
       <div className="max-w-4xl mx-auto">
         <GuidedProfileWizard
           profile={profile}
-          onUpdate={updateProfile}
+          onUpdate={handleUpdate}
           onComplete={handleComplete}
           isNewUser={false}
         />
@@ -56,7 +61,10 @@ function App() {
         <Navbar isAuthenticated={isAuthenticated} />
         <OnboardingWrapper>
           <Routes>
-            <Route path="/" element={<Landing />} />
+            <Route 
+              path="/" 
+              element={isAuthenticated ? <Navigate to="/dashboard" /> : <Landing />} 
+            />
             <Route 
               path="/signin" 
               element={isAuthenticated ? <Navigate to="/dashboard" /> : <SignIn />} 

@@ -30,7 +30,7 @@ export const ImportSection: React.FC<ImportSectionProps> = ({ onImport }) => {
                 <Download className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h4 className="text-white font-semibold">Import from LinkedIn</h4>
+                <h4 className="text-white font-semibold">Import from LinkedIn (beta)</h4>
               </div>
             </div>
             <div className="flex-1 flex flex-col justify-between">
@@ -67,7 +67,7 @@ export const ImportSection: React.FC<ImportSectionProps> = ({ onImport }) => {
                 <Upload className="w-6 h-6 text-green-500" />
               </div>
               <div>
-                <h4 className="text-white font-semibold">Import PDF Resume</h4>
+                <h4 className="text-white font-semibold">Import PDF Resume (beta)</h4>
               </div>
             </div>
             <div className="flex-1 flex flex-col justify-between">

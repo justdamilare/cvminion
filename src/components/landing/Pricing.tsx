@@ -11,7 +11,6 @@ const plans = [
       "Basic ATS optimization",
       "Standard templates",
       "Up to 6 credits rollover",
-      "Email support"
     ],
     buttonText: "Get Started",
     popular: false
@@ -29,7 +28,7 @@ const plans = [
       "Custom branding",
       "Export formats"
     ],
-    buttonText: "Start Free Trial",
+    buttonText: "Get Started",
     popular: true
   },
   {
@@ -46,7 +45,7 @@ const plans = [
       "Advanced analytics",
       "API access"
     ],
-    buttonText: "Contact Sales",
+    buttonText: "Get Started",
     popular: false
   }
 ];
@@ -67,7 +66,7 @@ export const Pricing = () => {
           <FadeIn 
             key={index} 
             delay={index * 0.2}
-            className={`bg-dark-light p-8 rounded-lg ${
+            className={`bg-dark-light p-8 rounded-lg flex flex-col h-full ${
               plan.popular ? 'ring-2 ring-primary' : ''
             }`}
           >
@@ -83,7 +82,7 @@ export const Pricing = () => {
                 <span className="text-gray-400">{plan.period}</span>
               )}
             </div>
-            <ul className="space-y-4 mb-8">
+            <ul className="space-y-4 mb-8 flex-grow">
               {plan.features.map((feature, i) => (
                 <li key={i} className="flex items-center text-gray-400">
                   <Check className="w-5 h-5 text-primary mr-2" />
@@ -91,12 +90,16 @@ export const Pricing = () => {
                 </li>
               ))}
             </ul>
-            <button className={`w-full py-3 rounded-lg font-bold ${
+            <button className={`w-full py-3 rounded-lg font-bold mt-auto ${
               plan.popular
                 ? 'bg-primary text-dark hover:bg-primary-dark'
                 : 'bg-dark text-white hover:bg-dark-light border border-gray-700'
-            } transition-all transform hover:scale-105`}>
-              {plan.buttonText}
+            } transition-all transform hover:scale-105`}
+            onClick={() => {
+              window.location.href = '/signin';
+            }}
+          >
+            {plan.buttonText}
             </button>
           </FadeIn>
         ))}

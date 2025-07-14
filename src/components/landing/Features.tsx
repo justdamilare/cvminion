@@ -1,11 +1,12 @@
 import React from 'react';
-import { Brain, Target, FileText, Sparkles, Trophy, Clock } from 'lucide-react';
+import { Target, FileText, Sparkles, Trophy, Clock } from 'lucide-react';
 import { FadeIn } from '../ui/FadeIn';
 import { FeatureCard } from './FeatureCard';
+import { Logo } from '../ui/Logo';
 
 const features = [
   {
-    icon: <Brain className="w-8 h-8 text-primary" />,
+    icon: <Logo className="w-8 h-8" />,
     title: "Smart Resume Generation",
     description: "Our AI analyzes job descriptions and tailors your resume to match requirements perfectly."
   },

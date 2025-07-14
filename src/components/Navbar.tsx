@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Brain, LogOut, User, Plus, Settings, Menu, X } from 'lucide-react';
+import { LogOut, User, Plus, Settings, Menu, X, ClipboardList } from 'lucide-react';
 import { getSupabaseClient } from '../lib/supabase';
 import { CreditBalance } from './credits/CreditBalance';
 import { CreditPurchaseModal } from './credits/CreditPurchaseModal';
+import { Logo } from './ui/Logo';
 
 export const Navbar = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   const navigate = useNavigate();
@@ -29,12 +30,12 @@ export const Navbar = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   };
 
   return (
-    <nav className="bg-dark px-6 py-4 relative">
+    <nav className="bg-dark px-6 py-4 relative z-40">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
-          <Brain className="w-8 h-8 text-primary" />
-          <span className="text-white font-bold text-xl">CVMinion</span>
+        <Link to={isAuthenticated ? "/dashboard" : "/"} className="flex items-center space-x-2">
+          <Logo className="w-8 h-8" />
+          <span className="text-white font-bold text-xl leading-none">CVMinion</span>
         </Link>
         
         {/* Desktop Navigation */}
@@ -42,6 +43,7 @@ export const Navbar = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
           {isAuthenticated ? (
             <>
               <Link to="/dashboard" className="text-white hover:text-primary inline-flex items-center transition-colors duration-200">
+                <ClipboardList className="w-4 h-4 mr-2" />
                 Dashboard
               </Link>
               <Link to="/profile" className="text-white hover:text-primary inline-flex items-center transition-colors duration-200">
@@ -101,7 +103,7 @@ export const Navbar = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
 
       {/* Mobile Navigation Menu */}
       <div 
-        className={`lg:hidden absolute top-full left-0 right-0 bg-dark-light border-t border-gray-700 shadow-lg transition-all duration-300 ease-in-out ${
+        className={`lg:hidden absolute top-full left-0 right-0 bg-dark-light border-t border-gray-700 shadow-lg transition-all duration-300 ease-in-out z-50 ${
           isMobileMenuOpen 
             ? 'opacity-100 translate-y-0 visible' 
             : 'opacity-0 -translate-y-2 invisible'
@@ -185,7 +187,7 @@ export const Navbar = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-[-1]"
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}

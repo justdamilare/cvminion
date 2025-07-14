@@ -73,7 +73,7 @@ interface ATSScore {
 const client = new OpenAI({
   apiKey: Deno.env.get("OPENAI_API_KEY") || "",
 });
-const model = Deno.env.get("MODEL_NAME") || "o4-mini";
+const model = Deno.env.get("MODEL_NAME") || "gpt-4o-mini";
 
 const ResumeSchema = z.object({
   full_name: z.string(),

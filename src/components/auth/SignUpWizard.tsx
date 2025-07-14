@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Brain, ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { PlanSelection } from './PlanSelection';
 import { AuthForm } from './AuthForm';
 import { FadeIn } from '../ui/FadeIn';
+import { Logo } from '../ui/Logo';
 import { signUp } from '../../lib/auth';
 import { subscriptionPlans, SubscriptionTier } from '../../config/stripe';
 import { getSupabaseClient } from '../../lib/supabase';
@@ -160,12 +161,19 @@ export const SignUpWizard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-dark flex flex-col items-center justify-center p-4">
-      <FadeIn className="w-full max-w-4xl">
+    <div className="min-h-screen bg-gradient-to-br from-dark via-dark to-gray-900 flex flex-col items-center justify-center p-4 relative">
+      <div className="absolute inset-0 bg-grid-pattern opacity-5 z-0"></div>
+      {/* Decorative Elements */}
+      <div className="absolute -top-20 -left-20 w-40 h-40 bg-primary/5 rounded-full blur-3xl z-0"></div>
+      <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-primary/5 rounded-full blur-3xl z-0"></div>
+      
+      <FadeIn className="w-full max-w-4xl relative z-20">
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-            <Brain className="w-8 h-8 text-primary" />
-            <span className="text-white font-bold text-2xl">CVMinion</span>
+          <Link to="/" className="inline-flex items-center space-x-3 mb-6 group relative z-30">
+            <div className="p-2 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors flex items-center justify-center">
+              <Logo className="w-10 h-10" />
+            </div>
+            <span className="text-white font-bold text-3xl tracking-tight leading-none">CVMinion</span>
           </Link>
           
           <div className="flex items-center justify-center space-x-4 mb-6">
@@ -199,16 +207,18 @@ export const SignUpWizard = () => {
           </div>
         </div>
 
-        <div className="bg-dark-light rounded-xl p-8 border border-gray-800">
+        <div className="bg-dark-light/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-800/50 shadow-2xl relative z-30">
           {getStepContent()}
         </div>
 
-        <p className="text-center mt-8 text-gray-400">
-          Already have an account?{' '}
-          <Link to="/signin" className="text-primary hover:text-primary-dark">
-            Sign in
-          </Link>
-        </p>
+        <div className="text-center mt-8 relative z-30">
+          <p className="text-gray-400">
+            Already have an account?{' '}
+            <Link to="/signin" className="text-primary hover:text-primary-dark font-medium transition-colors">
+              Sign in
+            </Link>
+          </p>
+        </div>
       </FadeIn>
     </div>
   );
