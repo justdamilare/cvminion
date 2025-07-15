@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVMinion - Template Picker Redesign</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="template_picker_theme.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        .template-card {
+            transition: all 0.2s ease-out;
+        }
+        
+        .template-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.15), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        
+        .template-card.selected {
+            transform: scale(1.05);
+            box-shadow: 0 25px 50px -12px rgb(34 197 94 / 0.25);
+        }
+        
+        .step-indicator {
+            transition: all 0.3s ease-out;
+        }
+        
+        .step-indicator.active {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+        }
+        
+        .step-indicator.completed {
+            background: #22c55e;
+            color: white;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .animate-scale-in {
+            animation: scaleIn 0.3s ease-out;
+        }
+        
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+        .stagger-5 { animation-delay: 0.5s; }
+        
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ripple::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .ripple:active::after {
+            width: 300px;
+            height: 300px;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                        <i data-lucide="file-text" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">CVMinion Resume Builder</h1>
+                </div>
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <i data-lucide="coins" class="w-4 h-4"></i>
+                    <span>12 credits</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Progress Steps -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-6 py-6">
+            <div class="flex items-center justify-center">
+                <div class="flex items-center space-x-8">
+                    <!-- Step 1 -->
+                    <div class="flex items-center">
+                        <div class="step-indicator completed w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center font-semibold text-sm">
+                            <i data-lucide="check" class="w-5 h-5"></i>
+                        </div>
+                        <div class="ml-3 hidden sm:block">
+                            <p class="text-sm font-medium text-gray-900">Job Description</p>
+                            <p class="text-xs text-gray-500">Added successfully</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Connector -->
+                    <div class="w-16 h-0.5 bg-green-500 hidden sm:block"></div>
+                    
+                    <!-- Step 2 -->
+                    <div class="flex items-center">
+                        <div class="step-indicator active w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-green-600 text-white flex items-center justify-center font-semibold text-sm">
+                            2
+                        </div>
+                        <div class="ml-3 hidden sm:block">
+                            <p class="text-sm font-medium text-gray-900">Pick Template</p>
+                            <p class="text-xs text-gray-500">Choose your style</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Connector -->
+                    <div class="w-16 h-0.5 bg-gray-300 hidden sm:block"></div>
+                    
+                    <!-- Step 3 -->
+                    <div class="flex items-center">
+                        <div class="step-indicator w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-semibold text-sm">
+                            3
+                        </div>
+                        <div class="ml-3 hidden sm:block">
+                            <p class="text-sm font-medium text-gray-500">Generate</p>
+                            <p class="text-xs text-gray-400">AI optimization</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Connector -->
+                    <div class="w-16 h-0.5 bg-gray-300 hidden sm:block"></div>
+                    
+                    <!-- Step 4 -->
+                    <div class="flex items-center">
+                        <div class="step-indicator w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-semibold text-sm">
+                            4
+                        </div>
+                        <div class="ml-3 hidden sm:block">
+                            <p class="text-sm font-medium text-gray-500">Download</p>
+                            <p class="text-xs text-gray-400">Ready to apply</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Page Title -->
+        <div class="text-center mb-8 animate-fade-in-up">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Choose Your Resume Template</h2>
+            <p class="text-lg text-gray-600">Select a template that best matches your industry and style preferences</p>
+        </div>
+
+        <!-- Template Grid -->
+        <div class="mb-8 animate-fade-in-up stagger-1">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+                <!-- Modern Template -->
+                <div class="template-card selected cursor-pointer group ripple" data-template="modern">
+                    <div class="relative bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl p-6 aspect-[4/5] flex flex-col items-center justify-center text-white overflow-hidden">
+                        <!-- Selection indicator -->
+                        <div class="absolute top-3 right-3 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                            <i data-lucide="check" class="w-4 h-4 text-white"></i>
+                        </div>
+                        
+                        <!-- Template preview -->
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                                <i data-lucide="layout" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg mb-2">Modern</h3>
+                            <p class="text-sm opacity-90 mb-3">Clean & professional</p>
+                            
+                            <!-- Mini preview -->
+                            <div class="bg-white/10 rounded p-2 text-xs space-y-1">
+                                <div class="bg-white/30 h-1 w-full rounded"></div>
+                                <div class="bg-white/30 h-1 w-3/4 rounded"></div>
+                                <div class="bg-white/30 h-1 w-1/2 rounded"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Stats -->
+                        <div class="absolute bottom-3 left-3 right-3">
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-1">
+                                    <i data-lucide="star" class="w-3 h-3 fill-yellow-400 text-yellow-400"></i>
+                                    <span>4.9</span>
+                                </div>
+                                <span class="bg-white/20 px-2 py-1 rounded-full">Most Popular</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Creative Template -->
+                <div class="template-card cursor-pointer group ripple" data-template="creative">
+                    <div class="relative bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl p-6 aspect-[4/5] flex flex-col items-center justify-center text-white overflow-hidden">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                                <i data-lucide="palette" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg mb-2">Creative</h3>
+                            <p class="text-sm opacity-90 mb-3">Bold & artistic</p>
+                            
+                            <div class="bg-white/10 rounded p-2 text-xs space-y-1">
+                                <div class="bg-white/30 h-1 w-full rounded"></div>
+                                <div class="bg-white/30 h-1 w-2/3 rounded"></div>
+                                <div class="bg-white/30 h-1 w-4/5 rounded"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="absolute bottom-3 left-3 right-3">
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-1">
+                                    <i data-lucide="star" class="w-3 h-3 fill-yellow-400 text-yellow-400"></i>
+                                    <span>4.7</span>
+                                </div>
+                                <span class="bg-white/20 px-2 py-1 rounded-full">Creative</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nova Template -->
+                <div class="template-card cursor-pointer group ripple" data-template="nova">
+                    <div class="relative bg-gradient-to-br from-green-500 to-green-700 rounded-xl p-6 aspect-[4/5] flex flex-col items-center justify-center text-white overflow-hidden">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                                <i data-lucide="zap" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg mb-2">Nova</h3>
+                            <p class="text-sm opacity-90 mb-3">Dynamic & fresh</p>
+                            
+                            <div class="bg-white/10 rounded p-2 text-xs space-y-1">
+                                <div class="bg-white/30 h-1 w-full rounded"></div>
+                                <div class="bg-white/30 h-1 w-5/6 rounded"></div>
+                                <div class="bg-white/30 h-1 w-3/4 rounded"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="absolute bottom-3 left-3 right-3">
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-1">
+                                    <i data-lucide="star" class="w-3 h-3 fill-yellow-400 text-yellow-400"></i>
+                                    <span>4.8</span>
+                                </div>
+                                <span class="bg-white/20 px-2 py-1 rounded-full">New</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Classic Template -->
+                <div class="template-card cursor-pointer group ripple" data-template="classic">
+                    <div class="relative bg-gradient-to-br from-gray-500 to-gray-700 rounded-xl p-6 aspect-[4/5] flex flex-col items-center justify-center text-white overflow-hidden">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                                <i data-lucide="file-text" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg mb-2">Classic</h3>
+                            <p class="text-sm opacity-90 mb-3">Traditional & formal</p>
+                            
+                            <div class="bg-white/10 rounded p-2 text-xs space-y-1">
+                                <div class="bg-white/30 h-1 w-full rounded"></div>
+                                <div class="bg-white/30 h-1 w-full rounded"></div>
+                                <div class="bg-white/30 h-1 w-full rounded"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="absolute bottom-3 left-3 right-3">
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-1">
+                                    <i data-lucide="star" class="w-3 h-3 fill-yellow-400 text-yellow-400"></i>
+                                    <span>4.6</span>
+                                </div>
+                                <span class="bg-white/20 px-2 py-1 rounded-full">ATS Safe</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Executive Template -->
+                <div class="template-card cursor-pointer group ripple" data-template="executive">
+                    <div class="relative bg-gradient-to-br from-amber-500 to-amber-700 rounded-xl p-6 aspect-[4/5] flex flex-col items-center justify-center text-white overflow-hidden">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                                <i data-lucide="crown" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg mb-2">Executive</h3>
+                            <p class="text-sm opacity-90 mb-3">Premium & elegant</p>
+                            
+                            <div class="bg-white/10 rounded p-2 text-xs space-y-1">
+                                <div class="bg-white/30 h-1 w-full rounded"></div>
+                                <div class="bg-white/30 h-1 w-4/5 rounded"></div>
+                                <div class="bg-white/30 h-1 w-3/5 rounded"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="absolute bottom-3 left-3 right-3">
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-1">
+                                    <i data-lucide="star" class="w-3 h-3 fill-yellow-400 text-yellow-400"></i>
+                                    <span>4.9</span>
+                                </div>
+                                <span class="bg-white/20 px-2 py-1 rounded-full">Premium</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Preview Section -->
+        <div class="grid lg:grid-cols-2 gap-8 mb-8 animate-fade-in-up stagger-2">
+            <!-- Preview Panel -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-semibold text-gray-900">Live Preview</h3>
+                    <div class="flex items-center gap-2">
+                        <button class="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100">
+                            <i data-lucide="zoom-in" class="w-4 h-4"></i>
+                        </button>
+                        <button class="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Resume Preview -->
+                <div class="aspect-[8.5/11] bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4 mx-auto">
+                            <i data-lucide="file-text" class="w-8 h-8 text-blue-600"></i>
+                        </div>
+                        <h4 class="text-lg font-medium text-gray-900 mb-2">Modern Template Preview</h4>
+                        <p class="text-gray-600 mb-4">Your resume will appear here with the selected template</p>
+                        <div class="animate-pulse space-y-2">
+                            <div class="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
+                            <div class="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                            <div class="h-4 bg-gray-200 rounded w-2/3 mx-auto"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Template Details -->
+            <div class="space-y-6">
+                <!-- Template Info Card -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+                    <div class="flex items-start gap-4 mb-6">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center text-white">
+                            <i data-lucide="layout" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-1">Modern Template</h3>
+                            <p class="text-gray-600">Perfect for tech and business professionals</p>
+                        </div>
+                    </div>
+
+                    <!-- Features -->
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="check" class="w-3 h-3 text-green-600"></i>
+                            </div>
+                            <span class="text-gray-700">ATS-Optimized formatting</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="check" class="w-3 h-3 text-green-600"></i>
+                            </div>
+                            <span class="text-gray-700">Clean 2-column layout</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="check" class="w-3 h-3 text-green-600"></i>
+                            </div>
+                            <span class="text-gray-700">Skills highlighting section</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="check" class="w-3 h-3 text-green-600"></i>
+                            </div>
+                            <span class="text-gray-700">Professional color scheme</span>
+                        </div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-600 mb-1">12,500+</div>
+                            <div class="text-sm text-gray-600">Users</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-600 mb-1">95%</div>
+                            <div class="text-sm text-gray-600">Success Rate</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tip Card -->
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white mt-0.5">
+                            <i data-lucide="lightbulb" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-blue-900 mb-2">💡 Pro Tip</h4>
+                            <p class="text-blue-800 text-sm">This template works best for tech, business, and consulting roles. The clean layout ensures high ATS compatibility while maintaining visual appeal.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Panel -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 animate-fade-in-up stagger-3">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center text-white">
+                        <i data-lucide="zap" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Ready to generate your resume?</h3>
+                        <p class="text-sm text-gray-600">This will consume 1 credit from your account</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <button class="px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors">
+                        <i data-lucide="settings" class="w-4 h-4 inline mr-2"></i>
+                        Customize
+                    </button>
+                    <button class="px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl transform hover:scale-105 ripple">
+                        <i data-lucide="zap" class="w-4 h-4 inline mr-2"></i>
+                        Generate Resume
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Template selection logic
+        document.querySelectorAll('.template-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove selected class from all cards
+                document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+                
+                // Add selected class to clicked card
+                this.classList.add('selected');
+                
+                // Update preview (placeholder)
+                const templateName = this.dataset.template;
+                console.log('Selected template:', templateName);
+                
+                // Add ripple effect
+                const ripple = this.querySelector('.ripple::after');
+                if (ripple) {
+                    ripple.style.animation = 'none';
+                    ripple.offsetHeight; // Trigger reflow
+                    ripple.style.animation = 'ripple 0.6s linear';
+                }
+            });
+        });
+        
+        // Add staggered animation delays
+        const animatedElements = document.querySelectorAll('.animate-fade-in-up');
+        animatedElements.forEach((el, index) => {
+            el.style.animationDelay = `${index * 0.1}s`;
+        });
+    </script>
+</body>
+</html>
