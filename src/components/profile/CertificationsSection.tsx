@@ -50,13 +50,13 @@ export const CertificationsSection: React.FC<CertificationsSectionProps> = ({ ce
   return (
     <div className="space-y-4">
 
-        <h2 className="text-xl font-bold text-white">Certifications</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Certifications</h2>
         <div className="flex gap-4">
        <input 
         type="text"
         value={newCertification}
         onChange={(e) => setNewCertification(e.target.value)}
-        className="flex-1 bg-dark text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
+        className="flex-1 bg-gray-50 dark:bg-dark text-gray-900 dark:text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none border border-gray-300 dark:border-gray-700 transition-colors duration-300"
         placeholder="Add a certification..."
       />
       <button
@@ -72,12 +72,12 @@ export const CertificationsSection: React.FC<CertificationsSectionProps> = ({ ce
         {certifications.map(certification => (
           <div
             key={certification.id}
-            className="flex items-center gap-2 bg-dark-light text-white px-3 py-1 rounded-full"
+            className="flex items-center gap-2 bg-gray-100 dark:bg-dark-light text-gray-900 dark:text-white px-3 py-1 rounded-full transition-colors duration-300"
           >
             <span>{certification.name}</span>
             <button
               onClick={() => handleRemoveCertification(certification.id)}
-              className="text-gray-400 hover:text-white"
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-300"
             >
               <X className="w-4 h-4" />
             </button>

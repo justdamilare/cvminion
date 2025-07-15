@@ -106,7 +106,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
   };
 
   return (
-    <div className="bg-gradient-to-br from-dark-light to-gray-900 rounded-xl p-6 border border-gray-700 shadow-xl">
+    <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-light dark:to-gray-900 rounded-xl p-6 border border-gray-300 dark:border-gray-700 shadow-xl transition-colors duration-300">
       {/* Completion Status Header */}
       {showCompletionIndicators && (
         <div className="bg-gradient-to-r from-blue-500/10 to-blue-600/10 border border-blue-500/20 rounded-lg p-4 mb-6">
@@ -126,19 +126,19 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                 )}
               </div>
               <div>
-                <div className="text-sm font-medium text-white">
+                <div className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300">
                   Work Experience
                 </div>
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-gray-600 dark:text-gray-400 transition-colors duration-300">
                   {experience.length} {experience.length === 1 ? 'experience' : 'experiences'} added
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-lg font-bold text-blue-400">
+              <div className="text-lg font-bold text-blue-600 dark:text-blue-400 transition-colors duration-300">
                 {completionStats.score}%
               </div>
-              <div className="text-xs text-gray-400">Quality Score</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 transition-colors duration-300">Quality Score</div>
             </div>
           </div>
           
@@ -146,7 +146,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
           {completionStats.recommendations.length > 0 && (
             <div className="mt-3 space-y-1">
               {completionStats.recommendations.map((rec, index) => (
-                <div key={index} className="flex items-center gap-2 text-sm text-blue-300">
+                <div key={index} className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-300 transition-colors duration-300">
                   <AlertCircle className="w-3 h-3" />
                   {rec}
                 </div>
@@ -163,8 +163,8 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
             <Briefcase className="w-5 h-5 text-dark" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-white">Work Experience</h2>
-            <p className="text-gray-400 text-sm">Showcase your professional journey</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Work Experience</h2>
+            <p className="text-gray-600 dark:text-gray-400 text-sm transition-colors duration-300">Showcase your professional journey</p>
           </div>
         </div>
         <button
@@ -179,10 +179,10 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
       {/* Experience List */}
       <div className="space-y-4">
         {experience.length === 0 && !isAdding ? (
-          <div className="text-center py-12 border-2 border-dashed border-gray-600 rounded-lg">
-            <Briefcase className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-white mb-2">No work experience added yet</h3>
-            <p className="text-gray-400 mb-4">Start building your professional profile by adding your work experience</p>
+          <div className="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg transition-colors duration-300">
+            <Briefcase className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4 transition-colors duration-300" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2 transition-colors duration-300">No work experience added yet</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4 transition-colors duration-300">Start building your professional profile by adding your work experience</p>
             <button
               onClick={() => setIsAdding(true)}
               className="bg-primary text-dark font-semibold px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors"

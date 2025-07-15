@@ -79,13 +79,13 @@ export const ProfilePage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark p-6">
+      <div className="min-h-screen bg-white dark:bg-dark p-6 transition-colors duration-300">
         <div className="max-w-4xl mx-auto">
           <div className="animate-pulse space-y-8">
-            <div className="h-8 bg-gray-700 rounded w-1/4"></div>
-            <div className="h-64 bg-gray-700 rounded"></div>
-            <div className="h-48 bg-gray-700 rounded"></div>
-            <div className="h-48 bg-gray-700 rounded"></div>
+            <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded w-1/4"></div>
+            <div className="h-64 bg-gray-300 dark:bg-gray-700 rounded"></div>
+            <div className="h-48 bg-gray-300 dark:bg-gray-700 rounded"></div>
+            <div className="h-48 bg-gray-300 dark:bg-gray-700 rounded"></div>
           </div>
         </div>
       </div>
@@ -95,7 +95,7 @@ export const ProfilePage = () => {
   // Show wizard for new users or when explicitly requested
   if (activeView === 'wizard') {
     return (
-      <div className="min-h-screen bg-dark p-6">
+      <div className="min-h-screen bg-white dark:bg-dark p-6 transition-colors duration-300">
         <GuidedProfileWizard
           profile={profile}
           onUpdate={handleUpdateProfile}
@@ -107,20 +107,20 @@ export const ProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-dark p-6">
+    <div className="min-h-screen bg-white dark:bg-dark p-6 transition-colors duration-300">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* New User Welcome Banner */}
         {completionPercentage < 30 && (
           <div className="bg-gradient-to-r from-primary/20 to-primary-dark/20 border border-primary/30 rounded-xl p-4 md:p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex-1">
-                <h2 className="text-xl md:text-2xl font-bold text-white mb-2">Welcome to CVMinion! 🚀</h2>
-                <p className="text-gray-300 mb-4">
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300">Welcome to CVMinion! 🚀</h2>
+                <p className="text-gray-600 dark:text-gray-300 mb-4 transition-colors duration-300">
                   Let's get your profile set up to start creating amazing resumes and landing interviews.
                 </p>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-gray-400">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">
                   <span>Current completion: {completionPercentage}%</span>
-                  <div className="w-full sm:w-32 bg-gray-700 rounded-full h-2">
+                  <div className="w-full sm:w-32 bg-gray-300 dark:bg-gray-700 rounded-full h-2">
                     <div 
                       className="bg-primary h-2 rounded-full transition-all duration-500"
                       style={{ width: `${completionPercentage}%` }}
@@ -142,19 +142,19 @@ export const ProfilePage = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">Profile Management</h1>
-              <div className="flex items-center gap-2 bg-gray-800 px-3 py-1 rounded-full w-fit">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Profile Management</h1>
+              <div className="flex items-center gap-2 bg-gray-200 dark:bg-gray-800 px-3 py-1 rounded-full w-fit transition-colors duration-300">
                 <div className={`w-3 h-3 rounded-full ${
                   completionPercentage >= 80 ? 'bg-green-500' :
                   completionPercentage >= 60 ? 'bg-yellow-500' :
                   completionPercentage >= 40 ? 'bg-orange-500' : 'bg-red-500'
                 }`} />
-                <span className="text-sm font-medium text-white">{completionPercentage}% Complete</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300">{completionPercentage}% Complete</span>
               </div>
             </div>
-            <p className="text-gray-400">Build and maintain your professional profile</p>
+            <p className="text-gray-600 dark:text-gray-400 transition-colors duration-300">Build and maintain your professional profile</p>
             {completionPercentage < 100 && (
-              <div className="mt-2 text-sm text-gray-300">
+              <div className="mt-2 text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
                 💡 Complete your profile to improve job application success
               </div>
             )}
@@ -162,13 +162,13 @@ export const ProfilePage = () => {
           
           {/* View Toggle */}
           <div className="flex items-center gap-3">
-            <div className="flex bg-gray-800 rounded-lg p-1">
+            <div className="flex bg-gray-200 dark:bg-gray-800 rounded-lg p-1 transition-colors duration-300">
               <button
                 onClick={() => setActiveView('standard')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   activeView === 'standard' 
                     ? 'bg-primary text-dark' 
-                    : 'text-gray-300 hover:text-white'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
                 }`}
               >
                 <User className="w-4 h-4" />
@@ -179,7 +179,7 @@ export const ProfilePage = () => {
                 className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   activeView === 'dashboard' 
                     ? 'bg-primary text-dark' 
-                    : 'text-gray-300 hover:text-white'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
                 }`}
               >
                 <BarChart3 className="w-4 h-4" />
@@ -200,7 +200,7 @@ export const ProfilePage = () => {
               className={`p-2 rounded-lg transition-colors ${
                 showCompletionIndicators 
                   ? 'bg-primary text-dark' 
-                  : 'bg-gray-800 text-gray-300 hover:text-white'
+                  : 'bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
               }`}
               title="Toggle completion indicators"
             >

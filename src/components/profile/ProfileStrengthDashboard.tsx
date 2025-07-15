@@ -254,22 +254,22 @@ export const ProfileStrengthDashboard: React.FC<ProfileStrengthDashboardProps> =
   return (
     <div className="space-y-6">
       {/* Overall Score Card */}
-      <div className="bg-gradient-to-br from-dark-light to-gray-900 rounded-xl p-6 border border-gray-700">
+      <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-light dark:to-gray-900 rounded-xl p-6 border border-gray-300 dark:border-gray-700 transition-colors duration-300">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-white">Profile Strength</h2>
-            <p className="text-gray-400">Overall profile quality assessment</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Profile Strength</h2>
+            <p className="text-gray-600 dark:text-gray-400 transition-colors duration-300">Overall profile quality assessment</p>
           </div>
           <div className="text-right">
             <div className={`text-4xl font-bold ${getScoreColor(overallScore)}`}>
               {overallScore}
             </div>
-            <div className="text-sm text-gray-400">out of 100</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">out of 100</div>
           </div>
         </div>
         
         {/* Progress bar */}
-        <div className="w-full bg-gray-700 rounded-full h-3 mb-4">
+        <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-3 mb-4 transition-colors duration-300">
           <div 
             className="h-3 rounded-full bg-gradient-to-r from-primary to-primary-dark transition-all duration-1000 ease-out"
             style={{ width: `${overallScore}%` }}
@@ -283,7 +283,7 @@ export const ProfileStrengthDashboard: React.FC<ProfileStrengthDashboardProps> =
               <TrendingUp className="w-4 h-4 text-blue-400" />
               <span className="text-sm font-medium text-blue-300">LinkedIn Import Impact</span>
             </div>
-            <div className="text-sm text-gray-300">
+            <div className="text-sm text-gray-700 dark:text-gray-300 transition-colors duration-300">
               Your profile strength would increase by an estimated 15-25 points with LinkedIn data
             </div>
           </div>
@@ -295,11 +295,11 @@ export const ProfileStrengthDashboard: React.FC<ProfileStrengthDashboardProps> =
         {metrics.map((metric) => {
           const Icon = metric.icon;
           return (
-            <div key={metric.name} className="bg-dark-light rounded-lg p-4 border border-gray-700">
+            <div key={metric.name} className="bg-gray-50 dark:bg-dark-light rounded-lg p-4 border border-gray-300 dark:border-gray-700 transition-colors duration-300">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <Icon className="w-5 h-5 text-primary" />
-                  <span className="font-medium text-white">{metric.name}</span>
+                  <span className="font-medium text-gray-900 dark:text-white transition-colors duration-300">{metric.name}</span>
                 </div>
                 <span className={`text-lg font-bold ${getScoreColor(metric.score)}`}>
                   {metric.score}
@@ -313,7 +313,7 @@ export const ProfileStrengthDashboard: React.FC<ProfileStrengthDashboardProps> =
                 />
               </div>
               
-              <p className="text-xs text-gray-400 mb-2">{metric.description}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 transition-colors duration-300">{metric.description}</p>
               
               {metric.improvement && (
                 <button
@@ -329,10 +329,10 @@ export const ProfileStrengthDashboard: React.FC<ProfileStrengthDashboardProps> =
       </div>
 
       {/* Achievements */}
-      <div className="bg-dark-light rounded-lg p-6 border border-gray-700">
+      <div className="bg-gray-50 dark:bg-dark-light rounded-lg p-6 border border-gray-300 dark:border-gray-700 transition-colors duration-300">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">Achievements</h3>
-          <div className="text-sm text-gray-400">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white transition-colors duration-300">Achievements</h3>
+          <div className="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">
             {unlockedAchievements.length} of {achievements.length} unlocked
           </div>
         </div>
@@ -345,17 +345,17 @@ export const ProfileStrengthDashboard: React.FC<ProfileStrengthDashboardProps> =
                 key={achievement.title}
                 className={`p-3 rounded-lg border transition-all duration-200 ${
                   achievement.unlocked 
-                    ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-primary/30' 
-                    : 'bg-gray-800/50 border-gray-700'
+                    ? 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 border-primary/30' 
+                    : 'bg-gray-200/50 dark:bg-gray-800/50 border-gray-400 dark:border-gray-700'
                 }`}
               >
                 <div className="flex items-center gap-2 mb-2">
                   <Icon className={`w-4 h-4 ${achievement.unlocked ? achievement.color : 'text-gray-500'}`} />
-                  <span className={`text-xs font-medium ${achievement.unlocked ? 'text-white' : 'text-gray-500'}`}>
+                  <span className={`text-xs font-medium ${achievement.unlocked ? 'text-gray-900 dark:text-white' : 'text-gray-500'} transition-colors duration-300`}>
                     {achievement.title}
                   </span>
                 </div>
-                <p className={`text-xs ${achievement.unlocked ? 'text-gray-300' : 'text-gray-600'}`}>
+                <p className={`text-xs ${achievement.unlocked ? 'text-gray-700 dark:text-gray-300' : 'text-gray-600'} transition-colors duration-300`}>
                   {achievement.description}
                 </p>
               </div>
@@ -365,10 +365,10 @@ export const ProfileStrengthDashboard: React.FC<ProfileStrengthDashboardProps> =
       </div>
 
       {/* Recommendations */}
-      <div className="bg-dark-light rounded-lg p-6 border border-gray-700">
+      <div className="bg-gray-50 dark:bg-dark-light rounded-lg p-6 border border-gray-300 dark:border-gray-700 transition-colors duration-300">
         <div className="flex items-center gap-2 mb-4">
           <Eye className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold text-white">Recommendations</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white transition-colors duration-300">Recommendations</h3>
         </div>
         
         <div className="space-y-3">

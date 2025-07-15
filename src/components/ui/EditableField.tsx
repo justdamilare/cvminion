@@ -44,12 +44,12 @@ export const EditableField: React.FC<EditableFieldProps> = ({
   if (isEditing) {
     return (
       <div className="flex items-center gap-2 w-full max-w-[600px]">
-        {icon && <span className="text-gray-400 flex-shrink-0">{icon}</span>}
+        {icon && <span className="text-gray-600 dark:text-gray-400 flex-shrink-0 transition-colors duration-300">{icon}</span>}
         <input
           type="text"
           value={editValue}
           onChange={(e) => setEditValue(e.target.value)}
-          className="flex-1 min-w-0 bg-dark text-white px-2 py-1 rounded focus:ring-2 focus:ring-primary focus:outline-none"
+          className="flex-1 min-w-0 bg-gray-50 dark:bg-dark text-gray-900 dark:text-white px-2 py-1 rounded focus:ring-2 focus:ring-primary focus:outline-none border border-gray-300 dark:border-gray-700 transition-colors duration-300"
           placeholder={placeholder}
           autoFocus
         />
@@ -75,13 +75,13 @@ export const EditableField: React.FC<EditableFieldProps> = ({
 
   return (
     <div className="group flex items-center gap-2 w-full max-w-[600px]">
-      {icon && <span className="text-gray-400 flex-shrink-0">{icon}</span>}
-      <span className={`${className} ${!value && 'text-gray-500 italic'} flex-1 min-w-0`}>
+      {icon && <span className="text-gray-600 dark:text-gray-400 flex-shrink-0 transition-colors duration-300">{icon}</span>}
+      <span className={`${className} ${!value && 'text-gray-500 dark:text-gray-400 italic'} flex-1 min-w-0`}>
         {value || placeholder || 'Click to edit...'}
       </span>
       <button
         onClick={() => setIsEditing(true)}
-        className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-white"
+        className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
       >
         <Edit2 className="w-4 h-4" />
       </button>

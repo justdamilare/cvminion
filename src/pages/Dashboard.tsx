@@ -76,11 +76,11 @@ export const Dashboard = () => {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-dark p-6 text-white">Loading...</div>;
+    return <div className="min-h-screen bg-white dark:bg-dark p-6 text-gray-900 dark:text-white transition-colors duration-300">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-dark p-6">
+    <div className="min-h-screen bg-white dark:bg-dark p-6 transition-colors duration-300">
       <div className="max-w-6xl mx-auto space-y-6">
         <DashboardHeader onNewApplication={() => setIsModalOpen(true)} />
         
@@ -93,26 +93,26 @@ export const Dashboard = () => {
                   <User className="w-6 h-6 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-white">Profile Completion</h3>
-                  <p className="text-gray-300 text-sm">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white transition-colors duration-300">Profile Completion</h3>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm transition-colors duration-300">
                     Your profile is {completionPercentage}% complete. 
                     {completionPercentage < 60 ? ' Complete it to improve your resume quality!' : ' Almost there!'}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
-                    <div className="w-24 sm:w-32 bg-gray-700 rounded-full h-2">
+                    <div className="w-24 sm:w-32 bg-gray-300 dark:bg-gray-700 rounded-full h-2">
                       <div 
                         className="bg-primary h-2 rounded-full transition-all duration-500"
                         style={{ width: `${completionPercentage}%` }}
                       />
                     </div>
-                    <span className="text-sm text-gray-400">{completionPercentage}%</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">{completionPercentage}%</span>
                   </div>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                 <button
                   onClick={() => navigate('/profile')}
-                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
                 >
                   <TrendingUp className="w-4 h-4" />
                   View Profile
@@ -131,13 +131,13 @@ export const Dashboard = () => {
         
         {/* View Toggle */}
         <div className="flex justify-end">
-          <div className="inline-flex rounded-lg border border-gray-600 bg-gray-800 p-1">
+          <div className="inline-flex rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 p-1 transition-colors duration-300">
             <button
               onClick={() => setViewMode('cards')}
               className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 viewMode === 'cards'
-                  ? 'bg-gray-700 text-white shadow-sm'
-                  : 'text-gray-400 hover:text-gray-200'
+                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
               }`}
             >
               <Grid3X3 className="w-4 h-4 mr-2" />
@@ -147,8 +147,8 @@ export const Dashboard = () => {
               onClick={() => setViewMode('list')}
               className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 viewMode === 'list'
-                  ? 'bg-gray-700 text-white shadow-sm'
-                  : 'text-gray-400 hover:text-gray-200'
+                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
               }`}
             >
               <List className="w-4 h-4 mr-2" />
@@ -171,8 +171,8 @@ export const Dashboard = () => {
             ))}
           </div>
         ) : (
-          <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
-            <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-700 border-b border-gray-600 text-sm font-medium text-gray-300">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden transition-colors duration-300">
+            <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">
               <div className="col-span-3">Position</div>
               <div className="col-span-2">Company</div>
               <div className="col-span-2">Status</div>
@@ -183,16 +183,16 @@ export const Dashboard = () => {
             {applications.map((application, index) => (
               <div
                 key={application.id}
-                className={`grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-700 cursor-pointer transition-colors hover:bg-gray-750 ${
+                className={`grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-200 dark:border-gray-700 cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-750 ${
                   index === applications.length - 1 ? 'border-b-0' : ''
                 }`}
                 onClick={() => setSelectedApplication(application)}
               >
                 <div className="col-span-3 flex items-center">
-                  <span className="font-medium text-white">{application.position}</span>
+                  <span className="font-medium text-gray-900 dark:text-white transition-colors duration-300">{application.position}</span>
                 </div>
                 <div className="col-span-2 flex items-center">
-                  <span className="text-gray-300">{application.company}</span>
+                  <span className="text-gray-600 dark:text-gray-300 transition-colors duration-300">{application.company}</span>
                 </div>
                 <div className="col-span-2 flex items-center">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -209,11 +209,11 @@ export const Dashboard = () => {
                   {application.atsScore ? (
                     <span className="text-primary font-medium">{application.atsScore}%</span>
                   ) : (
-                    <span className="text-gray-500">-</span>
+                    <span className="text-gray-500 dark:text-gray-400 transition-colors duration-300">-</span>
                   )}
                 </div>
                 <div className="col-span-2 flex items-center">
-                  <span className="text-gray-400">
+                  <span className="text-gray-500 dark:text-gray-400 transition-colors duration-300">
                     {application.appliedAt ? new Date(application.appliedAt).toLocaleDateString() : '-'}
                   </span>
                 </div>
@@ -223,7 +223,7 @@ export const Dashboard = () => {
                       e.stopPropagation();
                       setSelectedApplication(application);
                     }}
-                    className="text-gray-400 hover:text-white text-sm"
+                    className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white text-sm transition-colors duration-300"
                   >
                     View
                   </button>

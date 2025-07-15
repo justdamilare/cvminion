@@ -104,7 +104,7 @@ export const EducationSection: React.FC<EducationSectionProps> = ({
   };
 
   return (
-    <div className="bg-gradient-to-br from-dark-light to-gray-900 rounded-xl p-6 border border-gray-700 shadow-xl">
+    <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-light dark:to-gray-900 rounded-xl p-6 border border-gray-300 dark:border-gray-700 shadow-xl transition-colors duration-300">
       {/* Completion Status Header */}
       {showCompletionIndicators && (
         <div className="bg-gradient-to-r from-indigo-500/10 to-indigo-600/10 border border-indigo-500/20 rounded-lg p-4 mb-6">
@@ -124,26 +124,26 @@ export const EducationSection: React.FC<EducationSectionProps> = ({
                 )}
               </div>
               <div>
-                <div className="text-sm font-medium text-white">
+                <div className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300">
                   Education
                 </div>
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-gray-600 dark:text-gray-400 transition-colors duration-300">
                   {completionStats.count} {completionStats.count === 1 ? 'entry' : 'entries'} added
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-lg font-bold text-indigo-400">
+              <div className="text-lg font-bold text-indigo-600 dark:text-indigo-400 transition-colors duration-300">
                 {completionStats.score}%
               </div>
-              <div className="text-xs text-gray-400">Complete</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 transition-colors duration-300">Complete</div>
             </div>
           </div>
           
           {completionStats.recommendations.length > 0 && (
             <div className="mt-3 space-y-1">
               {completionStats.recommendations.map((rec, index) => (
-                <div key={index} className="flex items-center gap-2 text-sm text-indigo-300">
+                <div key={index} className="flex items-center gap-2 text-sm text-indigo-600 dark:text-indigo-300 transition-colors duration-300">
                   <AlertCircle className="w-3 h-3" />
                   {rec}
                 </div>

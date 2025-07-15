@@ -37,12 +37,12 @@ export const EducationCard: React.FC<EducationCardProps> = ({
   }
 
   return (
-    <div className="bg-dark-light p-6 rounded-lg">
+    <div className="bg-gray-50 dark:bg-dark-light p-6 rounded-lg transition-colors duration-300">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-white">{education.institution}</h3>
-          <p className="text-gray-400">{education.degree} in {education.field}</p>
-          <p className="text-sm text-gray-400">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white transition-colors duration-300">{education.institution}</h3>
+          <p className="text-gray-600 dark:text-gray-400 transition-colors duration-300">{education.degree} in {education.field}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">
             {formatDate(education.start_date)} - {education.end_date ? formatDate(education.end_date) : 'Present'}
           </p>
         </div>

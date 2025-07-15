@@ -10,8 +10,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onNewApplicati
   return (
     <div className="flex justify-between items-center mb-8">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Applications</h1>
-        <p className="text-gray-400">Track and manage your job applications</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300">Applications</h1>
+        <p className="text-gray-600 dark:text-gray-400 transition-colors duration-300">Track and manage your job applications</p>
       </div>
       
       <GradientBorder>

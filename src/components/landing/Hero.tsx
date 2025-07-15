@@ -11,20 +11,20 @@ export const Hero = () => {
       <div className="absolute inset-0 bg-gradient-radial from-yellow-500/10 via-transparent to-transparent" />
       
       <FadeIn className="relative text-center lg:py-32 py-20">
-        <span className="inline-flex items-center px-3 py-1 rounded-full bg-dark-light border border-yellow-500/20 text-yellow-500 text-sm mb-8">
+        <span className="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 dark:bg-dark-light border border-yellow-500/20 text-yellow-500 text-sm mb-8 transition-colors duration-300">
           <Sparkles className="w-4 h-4 mr-2" />
           AI-Powered Resume Builder
         </span>
         
         <h1 className="text-7xl font-bold mb-6 leading-tight">
-          <span className="text-white">Land Your</span>
+          <span className="text-gray-900 dark:text-white transition-colors duration-300">Land Your</span>
           <br />
           <span className="gradient-text">Dream Job Faster</span>
         </h1>
         
-        <p className="text-gray-400 text-xl max-w-2xl mx-auto mb-12">  
+        <p className="text-gray-600 dark:text-gray-400 text-xl max-w-2xl mx-auto mb-12 transition-colors duration-300">  
           Let AI craft your perfect resume for every application. 
-          <span className="text-white"> Get more interviews</span> with tailored resumes 
+          <span className="text-gray-900 dark:text-white transition-colors duration-300"> Get more interviews</span> with tailored resumes 
           that beat ATS systems.
         </p>
         

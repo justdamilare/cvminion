@@ -37,17 +37,17 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, isLoading: e
   return (
     <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-sm">
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-2">
+        <label htmlFor="email" className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2 transition-colors duration-300">
           Email
         </label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400 transition-colors duration-300" />
           <input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-dark-light text-white pl-10 pr-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
+            className="w-full bg-gray-50 dark:bg-dark-light text-gray-900 dark:text-white pl-10 pr-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none border border-gray-200 dark:border-gray-700 transition-colors duration-300"
             placeholder="Enter your email"
             required
           />
@@ -55,17 +55,17 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, isLoading: e
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-400 mb-2">
+        <label htmlFor="password" className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2 transition-colors duration-300">
           Password
         </label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400 transition-colors duration-300" />
           <input
             id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-dark-light text-white pl-10 pr-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
+            className="w-full bg-gray-50 dark:bg-dark-light text-gray-900 dark:text-white pl-10 pr-4 py-3 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none border border-gray-200 dark:border-gray-700 transition-colors duration-300"
             placeholder="Enter your password"
             required
           />

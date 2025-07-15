@@ -157,7 +157,7 @@ export const SimpleSubscriptionManager: React.FC<SimpleSubscriptionManagerProps>
                     <div>
                       <p className="text-2xl font-bold text-white">{currentPlan.name}</p>
                       <p className="text-gray-400">
-                        {subscriptionTier === 'free' ? 'Free' : `$${currentPlan.price}/month`}
+                        {subscriptionTier === 'free' ? 'Free' : `$${(currentPlan.price / 100).toFixed(2)}/month`}
                       </p>
                     </div>
                     
