@@ -5,28 +5,13 @@ import { ResumeTemplate } from './TemplateBase';
 import { formatDateRange } from './dateUtils';
 import { getContactWithIcon, cleanLinkedInUrl } from './contactIcons';
 
-// Register fonts
-Font.register({
-  family: "Inter",
-  fonts: [
-    {
-      src: "https://zhlpovxcsalhfxzjfcun.supabase.co/storage/v1/object/public/fonts/Inter/static/Inter_18pt-Regular.ttf",
-    },
-    {
-      src: "https://zhlpovxcsalhfxzjfcun.supabase.co/storage/v1/object/public/fonts/Inter/static/Inter_18pt-SemiBold.ttf",
-      fontWeight: 600,
-    },
-    {
-      src: "https://zhlpovxcsalhfxzjfcun.supabase.co/storage/v1/object/public/fonts/Inter/static/Inter_18pt-Bold.ttf",
-      fontWeight: 700,
-    },
-  ],
-});
+// Use built-in fonts for reliability
+// Font.register is commented out to avoid external dependencies
 
 const styles = StyleSheet.create({
   page: {
-    padding: 40,
-    fontFamily: "Inter",
+    padding: 30,
+    fontFamily: "Helvetica",
     fontSize: 11,
     color: "#1a1a1a",
     backgroundColor: "#ffffff",
@@ -35,8 +20,8 @@ const styles = StyleSheet.create({
   header: {
     textAlign: "center",
     borderBottom: "1px solid #e0e0e0",
-    paddingBottom: 20,
-    marginBottom: 24,
+    paddingBottom: 15,
+    marginBottom: 20,
   },
   name: {
     fontSize: 32,
@@ -57,7 +42,7 @@ const styles = StyleSheet.create({
     lineHeight: 1.4,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 18,
   },
   sectionTitle: {
     fontSize: 12,
@@ -84,6 +69,10 @@ const styles = StyleSheet.create({
   achievementList: {
     marginLeft: 16,
     marginBottom: 16,
+  },
+  experienceItem: {
+    marginBottom: 16,
+    breakInside: "avoid",
   },
   achievementItem: {
     fontSize: 11,
@@ -148,13 +137,23 @@ const styles = StyleSheet.create({
   },
 });
 
-const CleanPDFDocument = ({ resume }: { resume: any }) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.name}>{resume.full_name.toUpperCase()}</Text>
-        <Text style={styles.title}>Software Engineer</Text>
+const CleanPDFDocument = ({ resume, options = {} }: { resume: any; options?: any }) => {
+  const { showCompanyDescription = true, showKeyAchievements = true, showResponsibilities = true } = options;
+  
+  return (
+    <Document>
+      <Page 
+        size={[595.28, 1200]} // Custom height to allow for more content while maintaining A4 width
+        style={styles.page}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.name}>{resume.full_name.toUpperCase()}</Text>
+          <Text style={styles.title}>
+            {resume.experience && resume.experience.length > 0 && resume.experience[0].position 
+              ? resume.experience[0].position 
+              : 'Software Engineer'}
+          </Text>
         <View style={styles.contact}>
           <Text>
             {resume.email} • {resume.phone_number} • {resume.address}
@@ -182,16 +181,25 @@ const CleanPDFDocument = ({ resume }: { resume: any }) => (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Work Experience</Text>
           {resume.experience.map((exp: any, index: number) => (
-            <View key={index} style={{ marginBottom: 16 }}>
+            <View key={index} style={styles.experienceItem}>
               <Text style={styles.jobTitle}>{exp.position}</Text>
               <Text style={styles.company}>
                 {exp.company} • {exp.location} • {formatDateRange(exp.start_date, exp.end_date)}
               </Text>
               <View style={styles.achievementList}>
-                {exp.key_achievements?.map((achievement: string, i: number) => (
+                {showCompanyDescription && exp.company_description && (
+                  <Text style={styles.achievementItem}>{exp.company_description}</Text>
+                )}
+                {showKeyAchievements && exp.key_achievements?.map((achievement: string, i: number) => (
                   <View key={i} style={{ flexDirection: "row", marginBottom: 4 }}>
                     <Text style={styles.bullet}>•</Text>
                     <Text style={styles.achievementItem}>{achievement}</Text>
+                  </View>
+                ))}
+                {showResponsibilities && exp.responsibilities?.map((responsibility: string, i: number) => (
+                  <View key={i} style={{ flexDirection: "row", marginBottom: 4 }}>
+                    <Text style={styles.bullet}>•</Text>
+                    <Text style={styles.achievementItem}>{responsibility}</Text>
                   </View>
                 ))}
               </View>
@@ -273,15 +281,36 @@ const CleanPDFDocument = ({ resume }: { resume: any }) => (
       )}
     </Page>
   </Document>
-);
+  );
+};
 
 export const CleanTemplate: ResumeTemplate = {
   id: "clean",
   name: "Clean",
   description: "Simple single-column layout with clean typography",
+  preview: '',
   style: {
-    layout: "Single Column",
-    theme: "Professional",
+    name: 'Clean',
+    description: 'Simple single-column layout with clean typography',
+    preview: '',
+    styles,
+    layout: 'single',
+    theme: 'light',
+    sections: {
+      header: true,
+      summary: true,
+      experience: true,
+      education: true,
+      skills: true,
+      languages: true,
+      projects: true,
+      certifications: true,
+    },
   },
   render: CleanPDFDocument,
+  defaultOptions: {
+    showCompanyDescription: true,
+    showKeyAchievements: true,
+    showResponsibilities: true,
+  },
 };
