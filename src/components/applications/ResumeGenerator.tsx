@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Loader, Edit2, FileText, Code, Zap, Settings, Lightbulb } from 'lucide-react';
+import { RefreshCw, Loader, Edit2, FileText, Code, Zap, Settings, Lightbulb, Download } from 'lucide-react';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 import { Profile } from '../../types/profile';
 import { Application, Resume } from '../../types/application';
 import { tailorResume } from '../../lib/resume';
@@ -146,6 +147,7 @@ export const ResumeGenerator: React.FC<ResumeGeneratorProps> = ({
                 <PDFResume 
                   resume={application.generatedResume.tailored_resume}
                   template={selectedTemplate}
+                  showDownloadButton={true}
                 />
               </div>
             </div>
@@ -188,7 +190,6 @@ export const ResumeGenerator: React.FC<ResumeGeneratorProps> = ({
               selectedTemplate={selectedTemplate}
               onSelect={setSelectedTemplate}
               showPreview={true}
-              resume={application.generatedResume?.tailored_resume}
             />
             
             {/* Action Panel */}
@@ -283,6 +284,15 @@ export const ResumeGenerator: React.FC<ResumeGeneratorProps> = ({
                     <FileText className="w-4 h-4" />
                     View PDF
                   </button>
+                  <PDFDownloadLink
+                    document={selectedTemplate.render({ resume: application.generatedResume.tailored_resume })}
+                    fileName={`${application.generatedResume.tailored_resume.full_name?.replace(/\s+/g, '_') || 'resume'}_resume_${new Date().toISOString().split('T')[0]}.pdf`}
+                  >
+                    <button className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-gray-800 rounded-lg transition-colors">
+                      <Download className="w-4 h-4" />
+                      Download PDF
+                    </button>
+                  </PDFDownloadLink>
                   <button
                     onClick={() => setShowJSON(!showJSON)}
                     className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-gray-800 rounded-lg transition-colors"
