@@ -7,6 +7,11 @@ export interface ATSScore {
   content_quality_score: number;
   missing_keywords: string[];
   improvement_suggestions: string[];
+  structured_suggestions?: {
+    skills: string[];
+    experience_bullets: string[];
+    summary_additions: string[];
+  };
 }
 
 export type SkillLevel = 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';

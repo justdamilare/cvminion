@@ -73,6 +73,11 @@ interface ATSScore {
   content_quality_score: number;
   missing_keywords: string[];
   improvement_suggestions: string[];
+  structured_suggestions: {
+    skills: string[];
+    experience_bullets: string[];
+    summary_additions: string[];
+  };
 }
 
 const client = new OpenAI({
@@ -139,6 +144,11 @@ const ATSResponseSchema = z.object({
   content_quality_score: z.number(),
   missing_keywords: z.array(z.string()),
   improvement_suggestions: z.array(z.string()),
+  structured_suggestions: z.object({
+    skills: z.array(z.string()),
+    experience_bullets: z.array(z.string()),
+    summary_additions: z.array(z.string()),
+  }),
 });
 
 function formatDate(dateStr: string): string {
@@ -305,7 +315,12 @@ ANALYSIS REQUIREMENTS:
    - Recommend content improvements for sparse sections
    - Advise on emphasizing relevant experience aspects
 
-4. SCORING CRITERIA:
+4. STRUCTURED SUGGESTIONS:
+   - skills: Array of specific skills/technologies to add to the skills section (e.g., "Python", "AWS", "Docker")
+   - experience_bullets: Array of complete achievement/responsibility sentences to add to experience section (e.g., "Implemented microservices architecture using Docker and Kubernetes, improving deployment efficiency by 40%")
+   - summary_additions: Array of professional summary sentences highlighting relevant qualities (e.g., "Results-driven software engineer with 5+ years of experience in cloud-native development")
+
+5. SCORING CRITERIA:
    - Keyword Match Score: How well resume keywords align with job requirements
    - Format Score: Structure, organization, and ATS-friendliness
    - Content Quality Score: Depth, specificity, and relevance of content
