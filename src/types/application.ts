@@ -67,6 +67,11 @@ export interface Resume {
   languages: Language[];
   certifications: Certification[];
   projects: Project[];
+  improvements_made?: {
+    section: string;
+    improvement: string;
+    reason: string;
+  }[];
 };
 export interface Application {
   id: string;
