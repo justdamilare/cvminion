@@ -17,6 +17,7 @@ import { useProfile } from './hooks/useProfile';
 import { CheckoutReturn } from './components/payments/CheckoutReturn';
 import { Profile } from './types/profile';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { Analytics } from '@vercel/analytics/react';
 
 // Profile Wizard Page Component
 const ProfileWizardPage = () => {
@@ -109,6 +110,7 @@ function App() {
           </OnboardingWrapper>
           <ConditionalFooter />
           <Toaster position="top-right" />
+          <Analytics />
         </div>
       </Router>
     </ThemeProvider>
