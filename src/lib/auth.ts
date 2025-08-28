@@ -118,10 +118,28 @@ export const signOut = async () => {
 export const signInWithGoogle = async () => {
   const supabase = getSupabaseClient();
   try {
+    // Determine the correct redirect URL based on environment
+    const getRedirectUrl = () => {
+      const origin = window.location.origin;
+      
+      // Production domains
+      if (origin.includes('cvminion.com') || origin.includes('cvminion.vercel.app')) {
+        return `${origin}/auth/callback`;
+      }
+      
+      // Development
+      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        return `${origin}/auth/callback`;
+      }
+      
+      // Default fallback
+      return `${origin}/auth/callback`;
+    };
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: getRedirectUrl(),
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
@@ -142,10 +160,28 @@ export const signInWithGoogle = async () => {
 export const signInWithLinkedIn = async () => {
   const supabase = getSupabaseClient();
   try {
+    // Determine the correct redirect URL based on environment
+    const getRedirectUrl = () => {
+      const origin = window.location.origin;
+      
+      // Production domains
+      if (origin.includes('cvminion.com') || origin.includes('cvminion.vercel.app')) {
+        return `${origin}/auth/callback`;
+      }
+      
+      // Development
+      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        return `${origin}/auth/callback`;
+      }
+      
+      // Default fallback
+      return `${origin}/auth/callback`;
+    };
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'linkedin_oidc',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: getRedirectUrl(),
         scopes: 'openid profile email',
       }
     });
