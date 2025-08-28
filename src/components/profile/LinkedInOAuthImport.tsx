@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Linkedin, Download, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
 import { signInWithLinkedIn } from '../../lib/auth';
 import { extractLinkedInData, showLinkedInImportSuccess } from '../../lib/linkedinImport';
+import { getComprehensiveLinkedInData } from '../../lib/linkedinAPI';
 import { getSupabaseClient } from '../../lib/supabase';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../hooks/useAuth';
@@ -86,23 +87,39 @@ export const LinkedInOAuthImport: React.FC<LinkedInOAuthImportProps> = ({
         linkedinProvider
       });
       
-      // Extract available LinkedIn data from user metadata (try even if provider detection fails)
-      const linkedinData = extractLinkedInData(user.user_metadata);
+      // Try comprehensive LinkedIn API import first
+      let profileData: any = null;
+      let importMethod = 'basic';
       
-      if (!linkedinProvider) {
-        // Check if we have LinkedIn data even though provider detection failed
+      try {
+        // Attempt comprehensive API import
+        console.log('Attempting comprehensive LinkedIn API import...');
+        profileData = await getComprehensiveLinkedInData(user.id);
+        importMethod = 'comprehensive';
+        console.log('Comprehensive LinkedIn data retrieved:', profileData);
+      } catch (apiError) {
+        console.log('API import failed, falling back to basic OAuth data:', apiError);
+        
+        // Fallback to basic OAuth data
+        const linkedinData = extractLinkedInData(user.user_metadata);
         if (linkedinData && Object.keys(linkedinData).length > 0) {
-          console.log('Found LinkedIn data despite provider detection failure');
-          // Continue with import
-        } else {
-          // If not connected and no data, initiate LinkedIn OAuth to connect account
-          toast.info('Connecting to LinkedIn...');
-          await signInWithLinkedIn();
-          return;
+          profileData = {
+            full_name: linkedinData.full_name,
+            bio: linkedinData.headline,
+            avatar_url: linkedinData.avatar_url
+          };
+          importMethod = 'basic';
         }
       }
       
-      if (!linkedinData || Object.keys(linkedinData).length === 0) {
+      if (!linkedinProvider && !profileData) {
+        // If not connected and no data, initiate LinkedIn OAuth to connect account
+        toast.info('Connecting to LinkedIn...');
+        await signInWithLinkedIn();
+        return;
+      }
+      
+      if (!profileData) {
         toast.error('No LinkedIn data available to import. Try signing in with LinkedIn first.');
         setImportStatus('error');
         return;
@@ -112,19 +129,63 @@ export const LinkedInOAuthImport: React.FC<LinkedInOAuthImportProps> = ({
       const updateData: any = {};
       const importedFields: string[] = [];
 
-      if (linkedinData.full_name) {
-        updateData.full_name = linkedinData.full_name;
-        importedFields.push('name');
-      }
+      // Handle comprehensive data
+      if (importMethod === 'comprehensive') {
+        // Map comprehensive data
+        if (profileData.full_name) {
+          updateData.full_name = profileData.full_name;
+          importedFields.push('name');
+        }
+        
+        if (profileData.title) {
+          updateData.title = profileData.title;
+          importedFields.push('professional title');
+        }
+        
+        if (profileData.summary) {
+          updateData.bio = profileData.summary;
+          importedFields.push('professional summary');
+        }
+        
+        if (profileData.avatar_url) {
+          updateData.avatar_url = profileData.avatar_url;
+          importedFields.push('profile picture');
+        }
+        
+        if (profileData.experience && profileData.experience.length > 0) {
+          updateData.experience = profileData.experience;
+          importedFields.push(`${profileData.experience.length} work experiences`);
+        }
+        
+        if (profileData.education && profileData.education.length > 0) {
+          updateData.education = profileData.education;
+          importedFields.push(`${profileData.education.length} education entries`);
+        }
+        
+        if (profileData.skills && profileData.skills.length > 0) {
+          updateData.skills = profileData.skills;
+          importedFields.push(`${profileData.skills.length} skills`);
+        }
+        
+        toast.success('🚀 Comprehensive LinkedIn import successful!');
+      } else {
+        // Handle basic data
+        if (profileData.full_name) {
+          updateData.full_name = profileData.full_name;
+          importedFields.push('name');
+        }
 
-      if (linkedinData.headline) {
-        updateData.bio = linkedinData.headline;
-        importedFields.push('headline');
-      }
+        if (profileData.bio) {
+          updateData.bio = profileData.bio;
+          importedFields.push('headline');
+        }
 
-      if (linkedinData.avatar_url) {
-        updateData.avatar_url = linkedinData.avatar_url;
-        importedFields.push('profile picture');
+        if (profileData.avatar_url) {
+          updateData.avatar_url = profileData.avatar_url;
+          importedFields.push('profile picture');
+        }
+        
+        toast.success('✅ Basic LinkedIn import successful!');
       }
 
       if (Object.keys(updateData).length === 0) {
@@ -179,7 +240,7 @@ export const LinkedInOAuthImport: React.FC<LinkedInOAuthImportProps> = ({
           </h3>
           <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
             {isLinkedInConnected 
-              ? "Import your basic LinkedIn profile data to quickly populate your resume."
+              ? "Import your LinkedIn profile data. We'll try comprehensive import first, then fall back to basic data if needed."
               : "Connect your LinkedIn account to import your professional information instantly."
             }
           </p>
@@ -236,8 +297,9 @@ export const LinkedInOAuthImport: React.FC<LinkedInOAuthImportProps> = ({
       
       <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
         <div className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
-          <div><strong>Quick Import includes:</strong> Name, Professional Headline, Profile Picture</div>
-          <div><strong>Note:</strong> For complete work history, education, and skills, use the full LinkedIn export feature above.</div>
+          <div><strong>Comprehensive Import (API):</strong> Work experience, education, skills, certifications</div>
+          <div><strong>Basic Import (OAuth):</strong> Name, professional headline, profile picture</div>
+          <div><strong>Note:</strong> We attempt comprehensive import first, then fall back to basic data. For manual control, use the LinkedIn export feature above.</div>
         </div>
       </div>
       
