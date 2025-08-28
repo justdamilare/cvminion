@@ -40,29 +40,44 @@ export const LinkedInOAuthImport: React.FC<LinkedInOAuthImportProps> = ({
     }
   }, [isAuthenticated, supabase]);
 
+  const handleTestButton = () => {
+    console.log('=== SIMPLE TEST ===');
+    console.log('isAuthenticated:', isAuthenticated);
+    console.log('user:', user);
+    toast.success('Test button clicked! Check console for debug info.');
+  };
+
   const handleLinkedInConnect = async () => {
-    console.log('LinkedIn import - user state:', { 
-      user, 
-      hasUser: !!user, 
+    console.log('=== LINKEDIN IMPORT DEBUG START ===');
+    console.log('1. Authentication state:', { 
       isAuthenticated,
-      userId: user?.id 
+      hasUser: !!user,
+      userId: user?.id,
+      userEmail: user?.email 
     });
     
     if (!isAuthenticated) {
-      console.error('LinkedIn import failed - user not authenticated');
+      console.error('❌ FAILED: User not authenticated');
       toast.error('Please sign in to connect LinkedIn');
       return;
     }
     
     if (!user) {
-      console.error('LinkedIn import failed - no user object available');
+      console.error('❌ FAILED: No user object available');
       toast.error('Loading user data... Please try again in a moment.');
       return;
     }
+    
+    console.log('✅ PASSED: Authentication checks');
 
-    console.log('Starting LinkedIn import for user:', {
+    console.log('2. User details:', {
       userId: user.id,
       email: user.email,
+      createdAt: user.created_at,
+      lastSignIn: user.last_sign_in_at
+    });
+    
+    console.log('3. User metadata:', {
       app_metadata: user.app_metadata,
       user_metadata: user.user_metadata,
       identities: user.identities
@@ -80,11 +95,14 @@ export const LinkedInOAuthImport: React.FC<LinkedInOAuthImportProps> = ({
         user.user_metadata?.iss?.includes('linkedin') ||
         user.identities?.some(identity => identity.provider === 'linkedin_oidc');
       
-      console.log('User object for LinkedIn check:', {
-        app_metadata: user.app_metadata,
-        user_metadata: user.user_metadata,
-        identities: user.identities,
-        linkedinProvider
+      console.log('4. LinkedIn provider detection:', {
+        linkedinProvider,
+        checkDetails: {
+          providers_includes: user.app_metadata?.providers?.includes('linkedin_oidc'),
+          provider_equals: user.app_metadata?.provider === 'linkedin_oidc',
+          iss_includes: user.user_metadata?.iss?.includes('linkedin'),
+          identities_check: user.identities?.some(identity => identity.provider === 'linkedin_oidc')
+        }
       });
       
       // Try comprehensive LinkedIn API import first
@@ -276,6 +294,14 @@ export const LinkedInOAuthImport: React.FC<LinkedInOAuthImportProps> = ({
                   {isLinkedInConnected ? 'Import Data' : 'Connect LinkedIn'}
                 </>
               )}
+            </button>
+            
+            {/* Debug test button */}
+            <button
+              onClick={handleTestButton}
+              className="inline-flex items-center px-3 py-2 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            >
+              🐛 Debug
             </button>
 
             {/* Link to full LinkedIn import for more comprehensive data */}

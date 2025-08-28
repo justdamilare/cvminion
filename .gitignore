@@ -37,3 +37,4 @@ dist-ssr
 # Sensitive files
 *.pem
 *.key
+.env
