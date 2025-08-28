@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LinkedInImport } from './LinkedInImport';
+import { LinkedInOAuthImport } from './LinkedInOAuthImport';
 import { PDFResumeImport } from './PDFResumeImport';
 import { Profile } from '../../types/profile';
 import { Download, FileText, Zap, Upload, Brain } from 'lucide-react';
@@ -21,6 +22,12 @@ export const ImportSection: React.FC<ImportSectionProps> = ({ onImport }) => {
         </p>
       </div>
       
+      {/* LinkedIn OAuth Quick Import */}
+      <LinkedInOAuthImport 
+        onImportComplete={() => window.location.reload()} 
+        className="max-w-4xl mx-auto mb-6" 
+      />
+
       {/* Import Options */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-w-4xl mx-auto">
         <div className="bg-gray-50 dark:bg-dark rounded-lg p-6 border border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600 transition-colors duration-300">
