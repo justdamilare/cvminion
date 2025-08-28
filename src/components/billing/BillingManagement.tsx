@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   CreditCard, 
   Download, 
@@ -7,7 +7,6 @@ import {
   CheckCircle, 
   Plus,
   Settings,
-  Calendar,
   Receipt,
   ExternalLink,
   Trash2,

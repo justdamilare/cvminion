@@ -1,14 +1,10 @@
 import React from 'react';
 import { Check, FileText, Layout, Palette, Zap, Briefcase, Crown, Star } from 'lucide-react';
 import { ResumeTemplate } from './templates/TemplateBase';
-import { CreativeTemplate } from './templates/CreativeTemplate';
 import { ModernTemplate } from './templates/ModernTemplate';
-import { NovaTemplate } from './templates/NovaTemplate';
 import { ClassicTemplate } from './templates/ClassicTemplate';
 import { ProfessionalTemplate } from './templates/ProfessionalTemplate';
-import { ExecutiveTemplate } from './templates/ExecutiveTemplate';
 import { CleanTemplate } from './templates/CleanTemplate';
-import { MinimalTemplate } from './templates/MinimalTemplate';
 import { TemplateCarousel } from './TemplateCarousel';
 import { Application } from '../../types/application';
 
@@ -20,14 +16,10 @@ interface ResumeTemplatesProps {
 }
 
 const templates: ResumeTemplate[] = [
-  CleanTemplate,
   ProfessionalTemplate,
-  MinimalTemplate,
+  CleanTemplate,
   ModernTemplate,
-  CreativeTemplate,
-  NovaTemplate,
   ClassicTemplate,
-  ExecutiveTemplate,
 ];
 
 const getTemplateIcon = (templateId: string) => {
@@ -36,18 +28,10 @@ const getTemplateIcon = (templateId: string) => {
       return <FileText className="w-6 h-6" />;
     case 'professional':
       return <Briefcase className="w-6 h-6" />;
-    case 'minimal':
-      return <Star className="w-6 h-6" />;
     case 'modern':
       return <Layout className="w-6 h-6" />;
-    case 'creative':
-      return <Palette className="w-6 h-6" />;
-    case 'nova':
-      return <Zap className="w-6 h-6" />;
     case 'classic':
       return <FileText className="w-6 h-6" />;
-    case 'executive':
-      return <Crown className="w-6 h-6" />;
     default:
       return <FileText className="w-6 h-6" />;
   }
@@ -59,18 +43,10 @@ const getTemplateColor = (templateId: string) => {
       return 'from-slate-500 to-slate-700';
     case 'professional':
       return 'from-indigo-500 to-indigo-700';
-    case 'minimal':
-      return 'from-gray-500 to-gray-700';
     case 'modern':
       return 'from-blue-500 to-blue-700';
-    case 'creative':
-      return 'from-purple-500 to-purple-700';
-    case 'nova':
-      return 'from-green-500 to-green-700';
     case 'classic':
       return 'from-slate-500 to-slate-700';
-    case 'executive':
-      return 'from-amber-500 to-amber-700';
     default:
       return 'from-gray-500 to-gray-700';
   }
@@ -82,18 +58,10 @@ const getTemplateStats = (templateId: string) => {
       return { rating: 4.9, users: '2,100+', badge: 'Most Popular' };
     case 'professional':
       return { rating: 4.8, users: '1,800+', badge: 'Business' };
-    case 'minimal':
-      return { rating: 4.7, users: '1,500+', badge: 'Clean' };
     case 'modern':
-      return { rating: 4.9, users: '12,500+', badge: 'Legacy' };
-    case 'creative':
-      return { rating: 4.7, users: '8,200+', badge: 'Creative' };
-    case 'nova':
-      return { rating: 4.8, users: '6,100+', badge: 'New' };
+      return { rating: 4.9, users: '12,500+', badge: 'Modern' };
     case 'classic':
       return { rating: 4.6, users: '15,300+', badge: 'ATS Safe' };
-    case 'executive':
-      return { rating: 4.9, users: '4,500+', badge: 'Premium' };
     default:
       return { rating: 4.5, users: '1,000+', badge: 'Standard' };
   }

@@ -82,8 +82,7 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
       .maybeSingle();
 
     if (getError) throw getError;
-    console.log('existingProfile', existingProfile);
-    if (existingProfile) {
+      if (existingProfile) {
       return mapFromDbFields(existingProfile as unknown as Profile);
     }
 
@@ -181,7 +180,6 @@ export const updateProfile = async (userId: string, data: Partial<Profile>) => {
   const supabase = getSupabaseClient();
   
   const mappedData = mapToDbFields(data);
-  console.log('Updating profile with data:', mappedData);
 
   const { data: profile, error } = await supabase
     .from('profiles')

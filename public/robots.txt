@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard*
+Disallow: /profile*
+Disallow: /subscription*
+Disallow: /checkout*
+Disallow: /signin*
+Disallow: /signup*
+
+# Sitemap
+Sitemap: https://cvminion.com/sitemap.xml
+
+# Crawl delay for polite crawling
+Crawl-delay: 1

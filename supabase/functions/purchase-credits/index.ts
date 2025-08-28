@@ -54,12 +54,19 @@ Deno.serve(async (req: Request) => {
       throw new Error('Invalid credit package');
     }
 
-    // Process payment (demo mode for now)
+    // Process payment (demo mode for development)
     if (payment_method_id === 'demo') {
+      // Demo mode - only allow in development environment
+      const isDevelopment = Deno.env.get('ENVIRONMENT') !== 'production';
+      if (!isDevelopment) {
+        throw new Error('Demo payments not allowed in production');
+      }
       console.log(`Demo payment processed for ${creditPackage.credits} credits at $${creditPackage.price_cents / 100}`);
     } else {
-      // TODO: Integrate with real payment processor (Stripe, etc.)
-      throw new Error('Real payment processing not yet implemented');
+      // Production payment processing is handled via Stripe checkout sessions
+      // This function should only be called after successful payment verification
+      // from the stripe-webhook or retrieve-checkout-session functions
+      throw new Error('Direct payment processing not supported. Use Stripe checkout flow.');
     }
 
     // Add credits to user account (expires in 12 months for purchased credits)

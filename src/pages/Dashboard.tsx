@@ -158,7 +158,6 @@ export const Dashboard = () => {
         </div>
 
         {/* Applications Display */}
-        {console.log('Applications:', applications, 'ViewMode:', viewMode)}
         {viewMode === 'cards' ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {applications.map((application, index) => (
@@ -251,3 +250,5 @@ export const Dashboard = () => {
     </div>
   );
 };
+
+export default Dashboard;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Zap, 
   ShoppingCart, 
@@ -15,7 +15,7 @@ import {
 import { creditPackages } from '../../config/stripe';
 import { CreditBalance } from '../../types/billing';
 import { CreditTransaction } from '../../types/credits';
-import { formatCurrency, formatDate, getDaysUntil } from '../../types/billing';
+import { formatCurrency, formatDate } from '../../types/billing';
 
 interface CreditManagementProps {
   creditBalance: CreditBalance | null;
@@ -26,11 +26,6 @@ interface CreditManagementProps {
   transactionsLoading?: boolean;
 }
 
-interface CreditUsageChart {
-  date: string;
-  used: number;
-  remaining: number;
-}
 
 export const CreditManagement: React.FC<CreditManagementProps> = ({
   creditBalance,

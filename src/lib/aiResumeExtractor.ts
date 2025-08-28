@@ -91,7 +91,6 @@ export const extractResumeDataWithAI = async (
     console.error('AI extraction failed:', error);
     
     if (opts.enableFallbackParsing) {
-      console.log('Falling back to rule-based extraction...');
       return await fallbackResumeExtraction(resumeText);
     } else {
       throw error;
@@ -193,12 +192,6 @@ EXTRACTION PRIORITIES:
     response_format: { type: "json_object" as const } // Ensure JSON response
   };
 
-  console.log('Improved OpenAI API Request:', {
-    model: requestBody.model,
-    messageCount: requestBody.messages.length,
-    textLength: truncatedText.length,
-    maxTokens: requestBody.max_tokens
-  });
   
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -273,12 +266,6 @@ const extractWithOpenAI = async (
     max_tokens: options.maxTokens,
   };
 
-  console.log('OpenAI API Request:', {
-    model: requestBody.model,
-    messageCount: requestBody.messages.length,
-    promptLength: prompt.length,
-    maxTokens: requestBody.max_tokens
-  });
   
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',

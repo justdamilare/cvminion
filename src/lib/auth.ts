@@ -113,3 +113,49 @@ export const signOut = async () => {
     handleAuthError(error);
   }
 };
+
+// OAuth Sign-in Functions
+export const signInWithGoogle = async () => {
+  const supabase = getSupabaseClient();
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      }
+    });
+
+    if (error) {
+      handleAuthError(error);
+    }
+
+    return data;
+  } catch (error: unknown) {
+    handleAuthError(error);
+  }
+};
+
+export const signInWithLinkedIn = async () => {
+  const supabase = getSupabaseClient();
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'linkedin_oidc',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        scopes: 'openid profile email',
+      }
+    });
+
+    if (error) {
+      handleAuthError(error);
+    }
+
+    return data;
+  } catch (error: unknown) {
+    handleAuthError(error);
+  }
+};

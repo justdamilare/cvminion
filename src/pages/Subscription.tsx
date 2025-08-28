@@ -61,3 +61,5 @@ export const SubscriptionPage: React.FC = () => {
     </div>
   );
 };
+
+export default SubscriptionPage;

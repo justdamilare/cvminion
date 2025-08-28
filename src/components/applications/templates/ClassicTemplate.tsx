@@ -1,7 +1,7 @@
 'use client';
 
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-import { ResumeTemplate } from './TemplateBase';
+import { ResumeTemplate, calculateDynamicPageHeight } from './TemplateBase';
 import { formatDateRange } from './dateUtils';
 import { getContactWithIcon, cleanLinkedInUrl } from './contactIcons';
 
@@ -13,6 +13,7 @@ const styles = StyleSheet.create({
     color: "#333333",
     backgroundColor: "#FFFFFF",
     lineHeight: 1.4,
+    overflow: "hidden", // Standard overflow handling
   },
   header: {
     marginBottom: 20,
@@ -202,10 +203,14 @@ export const ClassicTemplate: ResumeTemplate = {
   },
   render: ({ resume, options = {} }) => {
     const { showCompanyDescription = true, showKeyAchievements = true, showResponsibilities = true } = options;
+    const dynamicHeight = calculateDynamicPageHeight(resume);
     
     return (
       <Document>
-        <Page size="A4" style={styles.page}>
+        <Page 
+          size={[595.28, dynamicHeight]} // Dynamic height based on content
+          style={styles.page}
+        >
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.name}>{resume.full_name || 'Name not provided'}</Text>

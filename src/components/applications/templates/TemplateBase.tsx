@@ -1,5 +1,5 @@
 import { Application } from '../../../types/application';
-import { Document, Page, StyleSheet, ViewStyle, TextStyle } from '@react-pdf/renderer';
+import { Document, Page, StyleSheet } from '@react-pdf/renderer';
 
 export interface TemplateProps {
   resume: NonNullable<Application['generatedResume']>['tailored_resume'];
@@ -40,6 +40,45 @@ export interface ResumeTemplate {
   defaultOptions?: TemplateProps['options'];
 }
 
+// Utility function to calculate dynamic page height based on content
+export const calculateDynamicPageHeight = (resume: NonNullable<Application['generatedResume']>['tailored_resume']): number => {
+  // Simple but effective approach: base height + content-based additions
+  let estimatedHeight = 1300; // Safe base height
+  
+  // Add height based on major content sections
+  if (resume.experience && resume.experience.length > 0) {
+    // Add height for experience section based on number of jobs and content
+    estimatedHeight += resume.experience.length * 50;
+    
+    // Add for achievements and responsibilities
+    resume.experience.forEach(exp => {
+      if (exp.key_achievements) {
+        estimatedHeight += exp.key_achievements.length * 15;
+      }
+      if (exp.responsibilities) {
+        estimatedHeight += exp.responsibilities.length * 15;
+      }
+    });
+  }
+  
+  // Add for other major sections
+  if (resume.projects && resume.projects.length > 0) {
+    estimatedHeight += resume.projects.length * 40;
+  }
+  
+  if (resume.education && resume.education.length > 0) {
+    estimatedHeight += resume.education.length * 30;
+  }
+  
+  // Cap the height at reasonable limits
+  const MIN_HEIGHT = 1300; // Ensure single page
+  const MAX_HEIGHT = 1800; // Keep it reasonable
+  
+  const finalHeight = Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, estimatedHeight));
+  
+  return finalHeight;
+};
+
 export const BaseTemplate: ResumeTemplate = {
   id: 'base',
   name: 'Base Template',
@@ -71,7 +110,7 @@ export const BaseTemplate: ResumeTemplate = {
       certifications: true,
     },
   },
-  render: ({ resume, options }) => (
+  render: () => (
     <Document>
       <Page size="A4" style={BaseTemplate.style.styles.page}>
         {/* Template specific content will go here */}

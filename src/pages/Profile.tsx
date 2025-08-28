@@ -13,13 +13,12 @@ import { GuidedProfileWizard } from '../components/profile/GuidedProfileWizard';
 import { Profile } from '../types/profile';
 import { ProjectSection } from '../components/profile/ProjectsSection';
 import { CertificationsSection } from '../components/profile/CertificationsSection';
-import { Settings, Zap, Target, BarChart3, User } from 'lucide-react';
+import {  Zap, Target, BarChart3, User } from 'lucide-react';
 
 export const ProfilePage = () => {
   const { 
     profile, 
     loading, 
-    updating, 
     completionPercentage,
     updateProfile: updateProfileData, 
     refreshProfile 
@@ -74,7 +73,7 @@ export const ProfilePage = () => {
     } else if (recommendation.includes('skills')) {
       document.getElementById('skills_expertise')?.scrollIntoView({ behavior: 'smooth' });
     }
-    toast.info('💡 ' + recommendation);
+    toast.success('💡 ' + recommendation); // Changed from info to success
   };
 
   if (loading) {
@@ -287,3 +286,5 @@ export const ProfilePage = () => {
     </div>
   );
 };
+
+export default ProfilePage;

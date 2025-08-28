@@ -49,7 +49,7 @@ export const SimpleSubscriptionManager: React.FC<SimpleSubscriptionManagerProps>
 
   const handleDowngrade = async (tier: SubscriptionTier) => {
     // For now, just show a message - this would need proper implementation
-    toast.info(`Downgrade to ${tier} - This feature will be implemented with full Stripe integration`);
+    toast.success(`Downgrade to ${tier} - This feature will be implemented with full Stripe integration`);
   };
 
   // Payment success handler

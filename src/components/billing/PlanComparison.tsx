@@ -7,8 +7,6 @@ import {
   Zap, 
   Star,
   Calculator,
-  Clock,
-  ArrowRight
 } from 'lucide-react';
 import { subscriptionPlans } from '../../config/stripe';
 import { SubscriptionTier } from '../../types/credits';
@@ -174,7 +172,7 @@ export const PlanComparison: React.FC<PlanComparisonProps> = ({
         <div className="grid lg:grid-cols-3 gap-6 mb-8">
           {(Object.entries(subscriptionPlans) as [SubscriptionTier, typeof subscriptionPlans[SubscriptionTier]][]).map(([tier, plan]) => {
             const isCurrentPlan = tier === currentTier;
-            const { isUpgrade, isDowngrade } = getTierUpgradeInfo(currentTier, tier);
+            const { isUpgrade } = getTierUpgradeInfo(currentTier, tier);
             const planColor = getPlanColor(tier);
             const isUpgradeUnavailable = isUpgrade && !subscriptionPlans[tier].stripePriceId;
             
@@ -342,7 +340,7 @@ export const PlanComparison: React.FC<PlanComparisonProps> = ({
                   <li>• Access premium templates and advanced ATS optimization</li>
                   <li>• Get priority support and faster response times</li>
                   {currentTier === 'free' && <li>• Custom branding and multiple export formats</li>}
-                  {currentTier !== 'pro' && <li>• Team collaboration and advanced analytics (Pro only)</li>}
+                  {currentTier === 'plus' && <li>• Team collaboration and advanced analytics (Pro only)</li>}
                 </ul>
               </div>
             </div>

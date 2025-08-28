@@ -77,4 +77,6 @@ export const CheckoutReturn: React.FC = () => {
       </div>
     </div>
   );
-}; 
+};
+
+export default CheckoutReturn; 

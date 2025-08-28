@@ -84,10 +84,17 @@ Deno.serve(async (req: Request) => {
     const upgradePrice = tierPricing[new_tier];
     if (upgradePrice > 0) {
       if (payment_method_id === 'demo') {
+        // Demo mode - only allow in development environment
+        const isDevelopment = Deno.env.get('ENVIRONMENT') !== 'production';
+        if (!isDevelopment) {
+          throw new Error('Demo upgrades not allowed in production');
+        }
         console.log(`Demo payment processed for ${new_tier} upgrade at $${upgradePrice}/month`);
       } else {
-        // TODO: Integrate with real payment processor (Stripe, etc.)
-        throw new Error('Real payment processing not yet implemented');
+        // Production payment processing is handled via Stripe checkout sessions
+        // This function should only be called after successful payment verification
+        // from the stripe-webhook function for subscription changes
+        throw new Error('Direct payment processing not supported. Use Stripe checkout flow.');
       }
     }
 

@@ -1,12 +1,6 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { Landing } from './pages/Landing';
-import { SignIn } from './pages/SignIn';
-import { SignUp } from './pages/SignUp';
-import { Dashboard } from './pages/Dashboard';
-import { ProfilePage } from './pages/Profile';
-import { SubscriptionPage } from './pages/Subscription';
+import { lazy, Suspense } from 'react';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { ConnectSupabase } from './components/ui/ConnectSupabase';
@@ -14,10 +8,21 @@ import { OnboardingWrapper } from './components/onboarding/OnboardingWrapper';
 import { GuidedProfileWizard } from './components/profile/GuidedProfileWizard';
 import { useAuth } from './hooks/useAuth';
 import { useProfile } from './hooks/useProfile';
-import { CheckoutReturn } from './components/payments/CheckoutReturn';
 import { Profile } from './types/profile';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Analytics } from '@vercel/analytics/react';
+import { PageErrorBoundary } from './components/ui/ErrorBoundary';
+import { PageLoadingSpinner } from './components/ui/LoadingSpinner';
+
+// Lazy load heavy components
+const Landing = lazy(() => import('./pages/Landing'));
+const SignIn = lazy(() => import('./pages/SignIn'));
+const SignUp = lazy(() => import('./pages/SignUp'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const ProfilePage = lazy(() => import('./pages/Profile'));
+const SubscriptionPage = lazy(() => import('./pages/Subscription'));
+const CheckoutReturn = lazy(() => import('./components/payments/CheckoutReturn'));
+const AuthCallback = lazy(() => import('./pages/AuthCallback'));
 
 // Profile Wizard Page Component
 const ProfileWizardPage = () => {
@@ -71,49 +76,54 @@ function App() {
   }
 
   return (
-    <ThemeProvider>
-      <Router>
-        <div className="min-h-screen bg-white dark:bg-dark transition-colors duration-300">
-          <Navbar isAuthenticated={isAuthenticated} />
-          <OnboardingWrapper>
-            <Routes>
-              <Route 
-                path="/" 
-                element={isAuthenticated ? <Navigate to="/dashboard" /> : <Landing />} 
-              />
-              <Route 
-                path="/signin" 
-                element={isAuthenticated ? <Navigate to="/dashboard" /> : <SignIn />} 
-              />
-              <Route 
-                path="/signup" 
-                element={isAuthenticated ? <Navigate to="/dashboard" /> : <SignUp />} 
-              />
-              <Route 
-                path="/dashboard" 
-                element={isAuthenticated ? <Dashboard /> : <Navigate to="/signin" />} 
-              />
-              <Route 
-                path="/profile" 
-                element={isAuthenticated ? <ProfilePage /> : <Navigate to="/signin" />} 
-              />
-              <Route 
-                path="/profile/wizard" 
-                element={isAuthenticated ? <ProfileWizardPage /> : <Navigate to="/signin" />} 
-              />
-              <Route 
-                path="/subscription" 
-                element={isAuthenticated ? <SubscriptionPage /> : <Navigate to="/signin" />} 
-              />
-              <Route path="/checkout/return" element={<CheckoutReturn />} />
-            </Routes>
-          </OnboardingWrapper>
-          <ConditionalFooter />
-          <Toaster position="top-right" />
-          <Analytics />
-        </div>
-      </Router>
-    </ThemeProvider>
+    <PageErrorBoundary>
+      <ThemeProvider>
+        <Router>
+          <div className="min-h-screen bg-white dark:bg-dark transition-colors duration-300">
+            <Navbar isAuthenticated={isAuthenticated} />
+            <OnboardingWrapper>
+              <Suspense fallback={<PageLoadingSpinner />}>
+                <Routes>
+                  <Route 
+                    path="/" 
+                    element={isAuthenticated ? <Navigate to="/dashboard" /> : <Landing />} 
+                  />
+                  <Route 
+                    path="/signin" 
+                    element={isAuthenticated ? <Navigate to="/dashboard" /> : <SignIn />} 
+                  />
+                  <Route 
+                    path="/signup" 
+                    element={isAuthenticated ? <Navigate to="/dashboard" /> : <SignUp />} 
+                  />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
+                  <Route 
+                    path="/dashboard" 
+                    element={isAuthenticated ? <Dashboard /> : <Navigate to="/signin" />} 
+                  />
+                  <Route 
+                    path="/profile" 
+                    element={isAuthenticated ? <ProfilePage /> : <Navigate to="/signin" />} 
+                  />
+                  <Route 
+                    path="/profile/wizard" 
+                    element={isAuthenticated ? <ProfileWizardPage /> : <Navigate to="/signin" />} 
+                  />
+                  <Route 
+                    path="/subscription" 
+                    element={isAuthenticated ? <SubscriptionPage /> : <Navigate to="/signin" />} 
+                  />
+                  <Route path="/checkout/return" element={<CheckoutReturn />} />
+                </Routes>
+              </Suspense>
+            </OnboardingWrapper>
+            <ConditionalFooter />
+            <Toaster position="top-right" />
+            <Analytics />
+          </div>
+        </Router>
+      </ThemeProvider>
+    </PageErrorBoundary>
   );
 }
 

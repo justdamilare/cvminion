@@ -98,9 +98,13 @@ Deno.serve(async (req: Request) => {
 
       if (!signatureValid) {
         console.error('Signature verification failed - no matching signatures');
-        // Temporary: Allow webhook to continue for debugging purposes
-        // TODO: Remove this bypass once signature verification is working
-        console.warn('⚠️  BYPASSING SIGNATURE VERIFICATION FOR DEBUGGING');
+        // In production, we should reject invalid signatures
+        const isDevelopment = Deno.env.get('ENVIRONMENT') !== 'production';
+        if (!isDevelopment) {
+          return new Response('Webhook signature verification failed', { status: 401 });
+        } else {
+          console.warn('⚠️  BYPASSING SIGNATURE VERIFICATION IN DEVELOPMENT MODE');
+        }
       }
 
       // Check timestamp (optional - prevents replay attacks)
