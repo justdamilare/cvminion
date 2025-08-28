@@ -26,25 +26,51 @@ export const LinkedInOAuthImport: React.FC<LinkedInOAuthImportProps> = ({
       return;
     }
 
+    console.log('Starting LinkedIn import for user:', {
+      userId: user.id,
+      email: user.email,
+      app_metadata: user.app_metadata,
+      user_metadata: user.user_metadata,
+      identities: user.identities
+    });
+
     setIsImporting(true);
     setImportStatus('idle');
 
     try {
       // Check if user is already connected with LinkedIn
-      const linkedinProvider = user.app_metadata?.providers?.includes('linkedin_oidc');
+      // Multiple ways to check for LinkedIn connection
+      const linkedinProvider = 
+        user.app_metadata?.providers?.includes('linkedin_oidc') ||
+        user.app_metadata?.provider === 'linkedin_oidc' ||
+        user.user_metadata?.iss?.includes('linkedin') ||
+        user.identities?.some(identity => identity.provider === 'linkedin_oidc');
       
-      if (!linkedinProvider) {
-        // If not connected, initiate LinkedIn OAuth to connect account
-        toast.info('Connecting to LinkedIn...');
-        await signInWithLinkedIn();
-        return;
-      }
-
-      // Extract available LinkedIn data from user metadata
+      console.log('User object for LinkedIn check:', {
+        app_metadata: user.app_metadata,
+        user_metadata: user.user_metadata,
+        identities: user.identities,
+        linkedinProvider
+      });
+      
+      // Extract available LinkedIn data from user metadata (try even if provider detection fails)
       const linkedinData = extractLinkedInData(user.user_metadata);
       
+      if (!linkedinProvider) {
+        // Check if we have LinkedIn data even though provider detection failed
+        if (linkedinData && Object.keys(linkedinData).length > 0) {
+          console.log('Found LinkedIn data despite provider detection failure');
+          // Continue with import
+        } else {
+          // If not connected and no data, initiate LinkedIn OAuth to connect account
+          toast.info('Connecting to LinkedIn...');
+          await signInWithLinkedIn();
+          return;
+        }
+      }
+      
       if (!linkedinData || Object.keys(linkedinData).length === 0) {
-        toast.error('No LinkedIn data available to import');
+        toast.error('No LinkedIn data available to import. Try signing in with LinkedIn first.');
         setImportStatus('error');
         return;
       }
@@ -99,7 +125,11 @@ export const LinkedInOAuthImport: React.FC<LinkedInOAuthImportProps> = ({
     }
   };
 
-  const isLinkedInConnected = user?.app_metadata?.providers?.includes('linkedin_oidc');
+  const isLinkedInConnected = 
+    user?.app_metadata?.providers?.includes('linkedin_oidc') ||
+    user?.app_metadata?.provider === 'linkedin_oidc' ||
+    user?.user_metadata?.iss?.includes('linkedin') ||
+    user?.identities?.some(identity => identity.provider === 'linkedin_oidc');
 
   return (
     <div className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 ${className}`}>
