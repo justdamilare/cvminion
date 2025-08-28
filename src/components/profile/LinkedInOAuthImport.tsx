@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Linkedin, Download, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
 import { signInWithLinkedIn } from '../../lib/auth';
 import { extractLinkedInData, showLinkedInImportSuccess } from '../../lib/linkedinImport';
 import { getSupabaseClient } from '../../lib/supabase';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../hooks/useAuth';
+import { User } from '@supabase/supabase-js';
 
 interface LinkedInOAuthImportProps {
   onImportComplete?: () => void;
@@ -17,12 +18,44 @@ export const LinkedInOAuthImport: React.FC<LinkedInOAuthImportProps> = ({
 }) => {
   const [isImporting, setIsImporting] = useState(false);
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const { user } = useAuth();
+  const [user, setUser] = useState<User | null>(null);
+  const { isAuthenticated } = useAuth();
   const supabase = getSupabaseClient();
 
+  // Get user from Supabase when component mounts
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        setUser(currentUser);
+        console.log('LinkedInOAuthImport - current user:', currentUser);
+      } catch (error) {
+        console.error('Failed to get user:', error);
+      }
+    };
+
+    if (isAuthenticated) {
+      getUser();
+    }
+  }, [isAuthenticated, supabase]);
+
   const handleLinkedInConnect = async () => {
-    if (!user) {
+    console.log('LinkedIn import - user state:', { 
+      user, 
+      hasUser: !!user, 
+      isAuthenticated,
+      userId: user?.id 
+    });
+    
+    if (!isAuthenticated) {
+      console.error('LinkedIn import failed - user not authenticated');
       toast.error('Please sign in to connect LinkedIn');
+      return;
+    }
+    
+    if (!user) {
+      console.error('LinkedIn import failed - no user object available');
+      toast.error('Loading user data... Please try again in a moment.');
       return;
     }
 
